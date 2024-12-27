@@ -10,6 +10,8 @@ This crate provides dynamic module which [emt.el](https://github.com/roife/emt) 
 
 ### Pre-built
 
+Download from [Releases](https://github.com/Master-Hash/ewt-rs/releases)
+
 Be aware, I use radical compile-time arguments, so I don't guarantee any compatibility.
 
 My env:
