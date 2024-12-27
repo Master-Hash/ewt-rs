@@ -19,3 +19,9 @@ windows = { version = "0.58.0", features = [
 
 [build-dependencies]
 bindgen = "0.71.1"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
+panic = "abort"
