@@ -7,9 +7,13 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
+use std::sync::LazyLock;
 use windows::core::h;
 use windows::core::HSTRING;
 use windows::Data::Text::SelectableWordsSegmenter;
+
+static segmenter: LazyLock<SelectableWordsSegmenter> =
+    LazyLock::new(|| SelectableWordsSegmenter::CreateWithLanguage(h!("zh-CN")).unwrap());
 
 #[no_mangle]
 #[allow(non_upper_case_globals)]
@@ -76,7 +80,6 @@ unsafe extern "C" fn Femt__do_split_helper(
 ) -> emacs_value {
     let cons_string = CString::new("cons").unwrap();
     let vector_string = CString::new("vector").unwrap();
-    let segmenter = SelectableWordsSegmenter::CreateWithLanguage(h!("zh-CN")).unwrap();
     let intern = (*env).intern.unwrap();
     let funcall = (*env).funcall.unwrap();
     let make_integer = (*env).make_integer.unwrap();
@@ -115,7 +118,6 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
     data: *mut raw::c_void,
 ) -> emacs_value {
     let cons_string = CString::new("cons").unwrap();
-    let segmenter = SelectableWordsSegmenter::CreateWithLanguage(h!("zh-CN")).unwrap();
     let intern = (*env).intern.unwrap();
     let funcall = (*env).funcall.unwrap();
     let make_integer = (*env).make_integer.unwrap();
