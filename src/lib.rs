@@ -4,16 +4,28 @@
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+#[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+use icu_segmenter::WordSegmenter;
+#[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+use itertools::Itertools;
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
+#[cfg(feature = "windows")]
 use std::sync::LazyLock;
+#[cfg(feature = "windows")]
 use windows::core::h;
+#[cfg(feature = "windows")]
 use windows::core::HSTRING;
+#[cfg(feature = "windows")]
 use windows::Data::Text::SelectableWordsSegmenter;
 
+#[cfg(feature = "windows")]
 static segmenter: LazyLock<SelectableWordsSegmenter> =
     LazyLock::new(|| SelectableWordsSegmenter::CreateWithLanguage(h!("zh-CN")).unwrap());
+
+// icu segmenter seems unable to be initialized in a static variable
+// Rc is used inside, so it is not Sync
 
 #[no_mangle]
 #[allow(non_upper_case_globals)]
@@ -96,16 +108,43 @@ unsafe extern "C" fn Femt__do_split_helper(
     strip_trailing_zero_bytes(&mut buf);
 
     let param_u8 = String::from_utf8(buf).unwrap();
-    let param_hstring = HSTRING::from(param_u8);
-    let res = segmenter.GetTokens(&param_hstring).unwrap();
+    #[cfg(feature = "windows")]
+    let mut consCell = {
+        let param_hstring = HSTRING::from(param_u8);
+        let res = segmenter.GetTokens(&param_hstring).unwrap();
 
-    let iConsCell = res.into_iter().map(|i| {
-        let segment = i.SourceTextSegment().unwrap();
-        let l = make_integer(env, segment.StartPosition.into());
-        let r = make_integer(env, (segment.StartPosition + segment.Length).into());
-        funcall(env, Qcons, 2, [l, r].as_mut_ptr())
-    });
-    let mut consCell = iConsCell.collect::<Vec<_>>();
+        let iConsCell = res.into_iter().map(|i| {
+            let segment = i.SourceTextSegment().unwrap();
+            let l = make_integer(env, segment.StartPosition.into());
+            let r = make_integer(env, (segment.StartPosition + segment.Length).into());
+            funcall(env, Qcons, 2, [l, r].as_mut_ptr())
+        });
+        iConsCell.collect::<Vec<_>>()
+    };
+    #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+    let mut consCell = {
+        let segmenter_icu = WordSegmenter::new_auto();
+        let segments = segmenter_icu
+            .segment_str(&param_u8)
+            .tuple_windows()
+            .map(|(i, j)| &param_u8[i..j]);
+        let ss = segments.map(|s| s.chars().count());
+        // we need prefix sum
+        // from: [4, 1, 4]
+        // to [(0, 4), (4, 5), (5, 9)]
+        let iConsCell = ss
+            .scan(0, |acc, x| {
+                let res = Some((*acc, *acc + x));
+                *acc += x;
+                res
+            })
+            .map(|(l, r)| {
+                let l = make_integer(env, l as i64);
+                let r = make_integer(env, r as i64);
+                funcall(env, Qcons, 2, [l, r].as_mut_ptr())
+            });
+        iConsCell.collect::<Vec<_>>()
+    };
     let l = consCell.len();
     let ddd = consCell.as_mut_ptr();
     funcall(env, Qvector, l as isize, ddd)
@@ -136,14 +175,51 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
     let n = extract_integer(env, *args.offset(1));
 
     let param_u8 = String::from_utf8(buf).unwrap();
-    let param_hstring = HSTRING::from(param_u8);
-    let res = segmenter
-        .GetTokenAt(&param_hstring, n.try_into().unwrap())
-        .unwrap();
+    #[cfg(feature = "windows")]
+    let (l, r) = {
+        let param_hstring = HSTRING::from(param_u8);
+        let res = segmenter
+            .GetTokenAt(&param_hstring, n.try_into().unwrap())
+            .unwrap();
 
-    let segment = res.SourceTextSegment().unwrap();
-    let l = make_integer(env, segment.StartPosition.into());
-    let r = make_integer(env, (segment.StartPosition + segment.Length).into());
+        let segment = res.SourceTextSegment().unwrap();
+        let l = make_integer(env, segment.StartPosition.into());
+        let r = make_integer(env, (segment.StartPosition + segment.Length).into());
+        (l, r)
+    };
+    #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+    let (l, r) = {
+        // Sadly WordSegmenter does not provide a way to get the nth token
+        let segmenter_icu = WordSegmenter::new_auto();
+        let segments = segmenter_icu
+            .segment_str(&param_u8)
+            .tuple_windows()
+            .map(|(i, j)| &param_u8[i..j]);
+        let mut ss = segments.map(|s| s.chars().count());
+        // we need prefix sum
+        // from: [4, 1, 4], 4
+        // to [(4, 5)]
+        // from: [4, 1, 4], 6
+        // to [(5, 9)]
+        let iConsCell = ss.try_fold(0, |acc, x| {
+            let r = acc + x;
+            let l = acc;
+            if n < r.try_into().unwrap() {
+                Err((l, r))
+            } else {
+                Ok(r)
+            }
+        });
+        match iConsCell {
+            // Seems all the program will be panic if we reach here
+            Ok(_) => unreachable!(),
+            Err((l, r)) => {
+                let l = make_integer(env, l as i64);
+                let r = make_integer(env, r as i64);
+                (l, r)
+            }
+        }
+    };
     funcall(env, Qcons, 2, [l, r].as_mut_ptr())
 }
 
