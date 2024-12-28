@@ -35,7 +35,7 @@ The segmenter language with WinRT API is hardcoded. Users can adjust `zh-CN` to 
 
 Microsoft doesn't and will never provide WinRT API for C.
 
-C++ 20 is required for cppwinrt. I encounter auto type dedupe error in the cppwinrt header file, which I cannot fix. The size could be much smaller (~100k?) though, if it works, it's favourable.
+C++ 20 is required for cppwinrt. I encounter auto type deduction error in the cppwinrt header file, which I cannot fix. The size could be much smaller (~100k?) though, if it works, it's favourable.
 
 I have to use unsafe extern "C" all the way to write Rust binding. The safety no better than C++, but it has better WinRT API support and type inference. When built with lto, the size ~260K is acceptable.
 
@@ -50,12 +50,12 @@ Personally I prefer the result of WinRT API. ICU does much poorer when segmentin
 
 ## Note on UTF-8 Grapheme Cluster
 
-This crate doesn't handle String on char level instead of grapheme cluster level. However, this causes no problem, probally because emt.el only use the helper function when moving in CJK characters.
+This crate handles String on char level instead of grapheme cluster level. However, this causes no problem, probally because emt.el only use the helper function when moving in CJK characters.
 
 ## Future Work
 
-* Try ICU Backend
-* Find out why M-S-{F,B} doesn't select anything
+- [x] Try ICU Backend
+- [ ] Find out why M-S-{F,B} doesn't select anything
 
 ## Credit
 
