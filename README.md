@@ -55,7 +55,7 @@ This crate handles String on char level instead of grapheme cluster level. Howev
 ## Future Work
 
 - [x] Try ICU Backend
-- [ ] Find out why M-S-{F,B} doesn't select anything
+- [x] Find out why M-S-{F,B} doesn't select anything
 
 ## Credit
 
