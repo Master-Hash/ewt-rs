@@ -41,11 +41,12 @@ I have to use unsafe extern "C" all the way to write Rust binding. The safety no
 
 ## WinRT API vs ICU
 
-Personally I prefer the result of WinRT API. ICU does much poorer when segmenting idioms, showing a lack of vocabulary:
+Personally I recommand WinRT API for Simplified Chinese and ICU for Traditional Chinese.
 
 | WinRT API | ICU |
 |-------|-------|
 | '有\|异曲同工\|之\|妙' | '有异\|曲\|同工\|之\|妙' |
+| '有\|異\|曲\|同工\|之\|妙' | '有\|異曲同工\|之\|妙' |
 | '丧心病狂\|的\|异想天开' | '丧心病狂\|的\|异\|想\|天\|开' |
 
 ## Note on UTF-8 Grapheme Cluster
