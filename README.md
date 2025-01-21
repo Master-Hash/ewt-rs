@@ -10,15 +10,11 @@ This crate provides dynamic module which [emt.el](https://github.com/roife/emt) 
 
 ### Pre-built
 
-Download from [Releases](https://github.com/Master-Hash/ewt-rs/releases).
+Download from Releases, or [CI Artifact](https://github.com/Master-Hash/ewt-rs/actions/workflows/build.yml) for unversioned binaries.
 
-Be aware, I use radical compile-time arguments, so I don't guarantee any compatibility.
+<!-- Please ignore the binary from Releases page. -->
 
-My env:
-
-* MSYS2 UCRT Emacs 29.4 (Windows)
-* Windows 11 build 26100
-* CPU >= with avx2 (or x86-64-v3)
+The Windows `.dll` files are only compatible with Emacs built with UCRT. MSVCRT is not supported.
 
 ### Manually build
 
