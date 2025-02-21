@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   pull_request:
   push:
+    tags:
+      - "v*.*.*"
     branches:
       - main
 
@@ -83,3 +85,31 @@ jobs:
           name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
+
+  release:
+    name: Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: download
+
+      - name: Create zip files
+        run: |
+          for f in download/*; do
+            7z a -tzip -mx=9 -r ${f}.zip ${f}/*
+          done
+
+      - name: Upload release
+        run: |
+          gh release create "${GITHUB_REF##*/}" download/*.zip -t "${GITHUB_REF##*/}" --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
