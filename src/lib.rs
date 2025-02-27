@@ -8,6 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use icu_segmenter::WordSegmenter;
 #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
 use itertools::Itertools;
+use std::ffi::CStr;
 use std::os::raw;
 use std::ptr;
 #[cfg(feature = "windows")]
@@ -36,11 +37,11 @@ pub static plugin_is_GPL_compatible: libc::c_int = 1;
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn emacs_module_init(runtime: *mut emacs_runtime) -> libc::c_int {
     unsafe {
-        let env = (*runtime).get_environment.unwrap()(runtime);
+        let env = (*runtime).get_environment.unwrap_unchecked()(runtime);
 
-        let intern = (*env).intern.unwrap();
-        let funcall = (*env).funcall.unwrap();
-        let make_function = (*env).make_function.unwrap();
+        let intern = (*env).intern.unwrap_unchecked();
+        let funcall = (*env).funcall.unwrap_unchecked();
+        let make_function = (*env).make_function.unwrap_unchecked();
 
         let Qfset = intern(env, c"fset".as_ptr());
 
@@ -89,10 +90,10 @@ unsafe extern "C" fn Femt__do_split_helper(
     data: *mut raw::c_void,
 ) -> emacs_value {
     unsafe {
-        let intern = (*env).intern.unwrap();
-        let funcall = (*env).funcall.unwrap();
-        let make_integer = (*env).make_integer.unwrap();
-        let copy_string_contents = (*env).copy_string_contents.unwrap();
+        let intern = (*env).intern.unwrap_unchecked();
+        let funcall = (*env).funcall.unwrap_unchecked();
+        let make_integer = (*env).make_integer.unwrap_unchecked();
+        let copy_string_contents = (*env).copy_string_contents.unwrap_unchecked();
 
         let Qcons = intern(env, c"cons".as_ptr());
         let Qvector = intern(env, c"vector".as_ptr());
@@ -103,9 +104,10 @@ unsafe extern "C" fn Femt__do_split_helper(
         let is_ok =
             copy_string_contents(env, *args, buf.as_mut_ptr() as *mut raw::c_char, &mut len);
 
-        strip_trailing_zero_bytes(&mut buf);
+        let param_u8 =
+            std::str::from_utf8_unchecked(CStr::from_bytes_with_nul_unchecked(&buf).to_bytes());
+        // let param_u8 = CStr::from_bytes_with_nul(&buf).unwrap().to_str().unwrap();
 
-        let param_u8 = String::from_utf8(buf).unwrap();
         #[cfg(feature = "windows")]
         let mut consCell = {
             let param_hstring = HSTRING::from(param_u8);
@@ -123,7 +125,7 @@ unsafe extern "C" fn Femt__do_split_helper(
         let mut consCell = {
             let segmenter_icu = WordSegmenter::new_auto();
             let segments = segmenter_icu
-                .segment_str(&param_u8)
+                .segment_str(param_u8)
                 .tuple_windows()
                 .map(|(i, j)| &param_u8[i..j]);
             let ss = segments.map(|s| s.chars().count());
@@ -156,11 +158,11 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
     data: *mut raw::c_void,
 ) -> emacs_value {
     unsafe {
-        let intern = (*env).intern.unwrap();
-        let funcall = (*env).funcall.unwrap();
-        let make_integer = (*env).make_integer.unwrap();
-        let extract_integer = (*env).extract_integer.unwrap();
-        let copy_string_contents = (*env).copy_string_contents.unwrap();
+        let intern = (*env).intern.unwrap_unchecked();
+        let funcall = (*env).funcall.unwrap_unchecked();
+        let make_integer = (*env).make_integer.unwrap_unchecked();
+        let extract_integer = (*env).extract_integer.unwrap_unchecked();
+        let copy_string_contents = (*env).copy_string_contents.unwrap_unchecked();
 
         let Qcons = intern(env, c"cons".as_ptr());
 
@@ -170,11 +172,12 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
         let is_ok =
             copy_string_contents(env, *args, buf.as_mut_ptr() as *mut raw::c_char, &mut len);
 
-        strip_trailing_zero_bytes(&mut buf);
+        let param_u8 =
+            std::str::from_utf8_unchecked(CStr::from_bytes_with_nul_unchecked(&buf).to_bytes());
+        // let param_u8 = CStr::from_bytes_with_nul(&buf).unwrap().to_str().unwrap();
 
         let n = extract_integer(env, *args.offset(1));
 
-        let param_u8 = String::from_utf8(buf).unwrap();
         #[cfg(feature = "windows")]
         let (l, r) = {
             let param_hstring = HSTRING::from(param_u8);
@@ -192,7 +195,7 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
             // Sadly WordSegmenter does not provide a way to get the nth token
             let segmenter_icu = WordSegmenter::new_auto();
             let segments = segmenter_icu
-                .segment_str(&param_u8)
+                .segment_str(param_u8)
                 .tuple_windows()
                 .map(|(i, j)| &param_u8[i..j]);
             let mut ss = segments.map(|s| s.chars().count());
@@ -221,15 +224,5 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
             }
         };
         funcall(env, Qcons, 2, [l, r].as_mut_ptr())
-    }
-}
-
-// Thank you,
-// https://github.com/ubolonton/emacs-module-rs/blob/126241a79d171e8de43c7db248b277fac7f1a4e8/src/types/string.rs#L103C1-L109C2
-fn strip_trailing_zero_bytes(bytes: &mut Vec<u8>) {
-    let mut len = bytes.len();
-    while len > 0 && bytes[len - 1] == 0 {
-        bytes.pop(); // strip trailing 0-byte(s)
-        len -= 1;
     }
 }
