@@ -8,7 +8,7 @@ license = "GPL-3.0-or-later"
 crate-type = ["cdylib"]
 
 [dependencies]
-icu_segmenter = { version = "2.0.0-beta1", optional = true }
+icu_segmenter = { version = "2.0.0-beta2", optional = true }
 libc = "0.2.169"
 windows = { version = "0.60.0", features = [
     "Data_Text",

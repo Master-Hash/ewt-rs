@@ -5,7 +5,7 @@
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
-use icu_segmenter::WordSegmenter;
+use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
 #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
 use itertools::Itertools;
 use std::ffi::CStr;
@@ -123,7 +123,7 @@ unsafe extern "C" fn Femt__do_split_helper(
         };
         #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
         let mut consCell = {
-            let segmenter_icu = WordSegmenter::new_auto();
+            let segmenter_icu = WordSegmenter::new_auto(WordBreakInvariantOptions::default());
             let segments = segmenter_icu
                 .segment_str(param_u8)
                 .tuple_windows()
@@ -193,7 +193,7 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
         #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
         let (l, r) = {
             // Sadly WordSegmenter does not provide a way to get the nth token
-            let segmenter_icu = WordSegmenter::new_auto();
+            let segmenter_icu = WordSegmenter::new_auto(WordBreakInvariantOptions::default());
             let segments = segmenter_icu
                 .segment_str(param_u8)
                 .tuple_windows()
