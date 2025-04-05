@@ -21,62 +21,55 @@ jobs:
               target: x86_64-pc-windows-gnu,
               os: windows-2025,
               feature: icu_segmenter,
-              bname: ewt.dll,
             }
           - {
               target: x86_64-pc-windows-gnu,
               os: windows-2025,
               feature: windows,
-              bname: ewt.dll,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
               os: windows-2025,
               feature: icu_segmenter,
-              bname: ewt.dll,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
               os: windows-2025,
               feature: windows,
-              bname: ewt.dll,
             }
           - {
               target: aarch64-pc-windows-gnullvm,
               os: windows-2025,
               feature: icu_segmenter,
-              bname: ewt.dll,
             }
           - {
               target: aarch64-pc-windows-gnullvm,
               os: windows-2025,
               feature: windows,
-              bname: ewt.dll,
             }
-          - {
-              target: x86_64-unknown-linux-gnu,
-              os: ubuntu-24.04,
-              feature: icu_segmenter,
-              bname: libewt.so,
-            }
-          - {
-              target: aarch64-unknown-linux-gnu,
-              os: ubuntu-24.04-arm,
-              feature: icu_segmenter,
-              bname: libewt.so,
-            }
-          - {
-              target: x86_64-apple-darwin,
-              os: macos-15,
-              feature: icu_segmenter,
-              bname: libewt.dylib,
-            }
-          - {
-              target: aarch64-apple-darwin,
-              os: macos-15,
-              feature: icu_segmenter,
-              bname: libewt.dylib,
-            }
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-24.04 }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
+          - { target: x86_64-apple-darwin, os: macos-15 }
+          - { target: aarch64-apple-darwin, os: macos-15 }
+        include:
+          - os: windows-2025
+            bname: ewt.dll
+          - os: ubuntu-24.04
+            bname: libewt.so
+            feature: icu_segmenter,
+          - os: ubuntu-24.04-arm
+            bname: libewt.so
+            feature: icu_segmenter,
+          - os: macos-15
+            bname: libewt.dylib
+            feature: icu_segmenter,
+          - target: x86_64-pc-windows-gnullvm
+            msystem: clang64
+            BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu
+          - target: aarch64-pc-windows-gnullvm
+            msystem: clangarm64
+            BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -100,7 +93,16 @@ jobs:
           cargo -V
           rustc -V
 
-      - name: Build
+      - uses: msys2/setup-msys2@v2
+        # Run only when having msystem variable
+        if: ${{ matrix.job.msystem != '' }}
+        with:
+          msystem: ${{ matrix.job.msystem }}
+          pacboy: clang:p
+
+      - name: Build、
+        env:
+          BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.job.BINDGEN_EXTRA_CLANG_ARGS || '' }}
         run: cargo build --locked --release --target=${{ matrix.job.target }} --no-default-features -F ${{ matrix.job.feature }}
 
       - name: "Artifact upload"
