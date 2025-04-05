@@ -35,7 +35,7 @@ jobs:
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clang64,
-              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu,
+              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu',
             }
           - {
               target: x86_64-pc-windows-gnullvm,
@@ -43,7 +43,7 @@ jobs:
               bname: ewt.dll,
               feature: windows,
               msystem: clang64,
-              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu,
+              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu',
             }
           - {
               target: aarch64-pc-windows-gnullvm,
@@ -51,7 +51,7 @@ jobs:
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clangarm64,
-              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu,
+              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu',
             }
           - {
               target: aarch64-pc-windows-gnullvm,
@@ -59,7 +59,7 @@ jobs:
               bname: ewt.dll,
               feature: windows,
               msystem: clangarm64,
-              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu,
+              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu',
             }
           - {
               target: x86_64-unknown-linux-gnu,
