@@ -20,55 +20,71 @@ jobs:
           - {
               target: x86_64-pc-windows-gnu,
               os: windows-2025,
+              bname: ewt.dll,
               feature: icu_segmenter,
             }
           - {
               target: x86_64-pc-windows-gnu,
               os: windows-2025,
+              bname: ewt.dll,
               feature: windows,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
               os: windows-2025,
+              bname: ewt.dll,
               feature: icu_segmenter,
+              msystem: clang64,
+              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
               os: windows-2025,
+              bname: ewt.dll,
               feature: windows,
+              msystem: clang64,
+              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu,
             }
           - {
               target: aarch64-pc-windows-gnullvm,
               os: windows-2025,
+              bname: ewt.dll,
+              feature: icu_segmenter,
+              msystem: clangarm64,
+              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu,
+            }
+          - {
+              target: aarch64-pc-windows-gnullvm,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: windows,
+              msystem: clangarm64,
+              BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu,
+            }
+          - {
+              target: x86_64-unknown-linux-gnu,
+              os: ubuntu-24.04,
+              bname: libewt.so,
               feature: icu_segmenter,
             }
           - {
-              target: aarch64-pc-windows-gnullvm,
-              os: windows-2025,
-              feature: windows,
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-24.04-arm,
+              bname: libewt.so,
+              feature: icu_segmenter,
             }
-          - { target: x86_64-unknown-linux-gnu, os: ubuntu-24.04 }
-          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
-          - { target: x86_64-apple-darwin, os: macos-15 }
-          - { target: aarch64-apple-darwin, os: macos-15 }
-        include:
-          - job.os: windows-2025
-            job.bname: ewt.dll
-          - job.os: ubuntu-24.04
-            job.bname: libewt.so
-            job.feature: icu_segmenter,
-          - job.os: ubuntu-24.04-arm
-            job.bname: libewt.so
-            job.feature: icu_segmenter,
-          - job.os: macos-15
-            job.bname: libewt.dylib
-            job.feature: icu_segmenter,
-          - job.target: x86_64-pc-windows-gnullvm
-            job.msystem: clang64
-            job.BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu
-          - job.target: aarch64-pc-windows-gnullvm
-            job.msystem: clangarm64
-            job.BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu
+          - {
+              target: x86_64-apple-darwin,
+              os: macos-15,
+              bname: libewt.dylib,
+              feature: icu_segmenter,
+            }
+          - {
+              target: aarch64-apple-darwin,
+              os: macos-15,
+              bname: libewt.dylib,
+              feature: icu_segmenter,
+            }
 
     steps:
       - name: Checkout source code
