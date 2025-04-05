@@ -52,23 +52,23 @@ jobs:
           - { target: x86_64-apple-darwin, os: macos-15 }
           - { target: aarch64-apple-darwin, os: macos-15 }
         include:
-          - os: windows-2025
-            bname: ewt.dll
-          - os: ubuntu-24.04
-            bname: libewt.so
-            feature: icu_segmenter,
-          - os: ubuntu-24.04-arm
-            bname: libewt.so
-            feature: icu_segmenter,
-          - os: macos-15
-            bname: libewt.dylib
-            feature: icu_segmenter,
-          - target: x86_64-pc-windows-gnullvm
-            msystem: clang64
-            BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu
-          - target: aarch64-pc-windows-gnullvm
-            msystem: clangarm64
-            BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu
+          - job.os: windows-2025
+            job.bname: ewt.dll
+          - job.os: ubuntu-24.04
+            job.bname: libewt.so
+            job.feature: icu_segmenter,
+          - job.os: ubuntu-24.04-arm
+            job.bname: libewt.so
+            job.feature: icu_segmenter,
+          - job.os: macos-15
+            job.bname: libewt.dylib
+            job.feature: icu_segmenter,
+          - job.target: x86_64-pc-windows-gnullvm
+            job.msystem: clang64
+            job.BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu
+          - job.target: aarch64-pc-windows-gnullvm
+            job.msystem: clangarm64
+            job.BINDGEN_EXTRA_CLANG_ARGS: -I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu
 
     steps:
       - name: Checkout source code
@@ -100,7 +100,7 @@ jobs:
           msystem: ${{ matrix.job.msystem }}
           pacboy: clang:p
 
-      - name: Build、
+      - name: Build
         env:
           BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.job.BINDGEN_EXTRA_CLANG_ARGS || '' }}
         run: cargo build --locked --release --target=${{ matrix.job.target }} --no-default-features -F ${{ matrix.job.feature }}
