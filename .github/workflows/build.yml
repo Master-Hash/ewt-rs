@@ -35,7 +35,7 @@ jobs:
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clang64,
-              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu',
+              # BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu',
             }
           - {
               target: x86_64-pc-windows-gnullvm,
@@ -43,7 +43,7 @@ jobs:
               bname: ewt.dll,
               feature: windows,
               msystem: clang64,
-              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu',
+              # BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu',
             }
           - {
               target: aarch64-pc-windows-gnullvm,
@@ -51,7 +51,7 @@ jobs:
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clangarm64,
-              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu',
+              # BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu',
             }
           - {
               target: aarch64-pc-windows-gnullvm,
@@ -59,7 +59,7 @@ jobs:
               bname: ewt.dll,
               feature: windows,
               msystem: clangarm64,
-              BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu',
+              # BINDGEN_EXTRA_CLANG_ARGS: '-I"C:\msys64\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu',
             }
           - {
               target: x86_64-unknown-linux-gnu,
@@ -119,6 +119,10 @@ jobs:
       - name: Build
         env:
           BINDGEN_EXTRA_CLANG_ARGS: ${{ matrix.job.BINDGEN_EXTRA_CLANG_ARGS || '' }}
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clangarm64\bin\clang.exe
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
         run: cargo build --locked --release --target=${{ matrix.job.target }} --no-default-features -F ${{ matrix.job.feature }}
 
       - name: "Artifact upload"
