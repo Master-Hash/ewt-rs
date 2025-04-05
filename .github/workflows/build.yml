@@ -113,16 +113,16 @@ jobs:
           update: true
           msystem: ${{ matrix.job.msystem }}
           pacboy: clang:p
-      - run: |
-          tree ${{ steps.msys2.outputs.msys2-location }}
-        if: ${{ matrix.job.msystem != '' }}
+      # - run: |
+      #     tree ${{ steps.msys2.outputs.msys2-location }}
+      #   if: ${{ matrix.job.msystem != '' }}
 
       - name: Build
         env:
           BINDGEN_EXTRA_CLANG_ARGS_X86_64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\include" --target=x86_64-pc-windows-gnu
           CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
           CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
-          BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\include" --target=aarch64-pc-windows-gnu
+          BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\include" -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\include\llvm_libc_wrappers" --target=aarch64-pc-windows-gnu
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clangarm64\bin\clang.exe
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
         run: cargo build --locked --release --target=${{ matrix.job.target }} --no-default-features -F ${{ matrix.job.feature }}
