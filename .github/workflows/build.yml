@@ -30,6 +30,30 @@ jobs:
               bname: ewt.dll,
             }
           - {
+              target: x86_64-pc-windows-gnullvm,
+              os: windows-2025,
+              feature: icu_segmenter,
+              bname: ewt.dll,
+            }
+          - {
+              target: x86_64-pc-windows-gnullvm,
+              os: windows-2025,
+              feature: windows,
+              bname: ewt.dll,
+            }
+          - {
+              target: aarch64-pc-windows-gnullvm,
+              os: windows-2025,
+              feature: icu_segmenter,
+              bname: ewt.dll,
+            }
+          - {
+              target: aarch64-pc-windows-gnullvm,
+              os: windows-2025,
+              feature: windows,
+              bname: ewt.dll,
+            }
+          - {
               target: x86_64-unknown-linux-gnu,
               os: ubuntu-24.04,
               feature: icu_segmenter,
