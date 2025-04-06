@@ -115,8 +115,8 @@ jobs:
           pacboy: clang:p clang:c
 
       - run: |
-          echo "LIBCLANG_PATH=${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.msystem }}\bin\libclang.dll" >> "$GITHUB_ENV"
-          echo "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.msystem }}\bin" >> "$GITHUB_PATH"
+          echo "LIBCLANG_PATH=${{ steps.msys2.outputs.msys2-location }}\clang64\bin\libclang.dll" >> "$GITHUB_ENV"
+          echo "${{ steps.msys2.outputs.msys2-location }}\clang64\bin" >> "$GITHUB_PATH"
         if: ${{ matrix.job.msystem != '' }}
 
       - run: |
