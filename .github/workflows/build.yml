@@ -119,10 +119,10 @@ jobs:
           echo "${{ steps.msys2.outputs.msys2-location }}\clang64\bin" >> "$GITHUB_PATH"
         if: ${{ matrix.job.msystem != '' }}
 
-      # - run: |
-      #     mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\lib\aarch64-pc-windows-gnu
-      #     cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\lib\aarch64-pc-windows-gnu\libclang_rt.builtins.a
-      #   if: ${{ matrix.job.msystem == 'clangarm64' }}
+      - run: |
+          mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\lib\aarch64-w64-windows-gnu
+          cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\lib\aarch64-w64-windows-gnu\libclang_rt.builtins.a
+        if: ${{ matrix.job.msystem == 'clangarm64' }}
 
       - name: Build
         env:
