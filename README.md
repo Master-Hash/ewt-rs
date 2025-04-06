@@ -10,18 +10,20 @@ This crate provides dynamic module which [emt.el](https://github.com/roife/emt) 
 
 ### Pre-built
 
-Download from Releases, or [CI Artifact](https://github.com/Master-Hash/ewt-rs/actions/workflows/build.yml) for unversioned binaries.
+Download from [Releases](https://github.com/Master-Hash/ewt-rs/releases), or [CI Artifact](https://github.com/Master-Hash/ewt-rs/actions/workflows/build.yml) for unversioned binaries.
 
 <!-- Please ignore the binary from Releases page. -->
 
-The Windows `.dll` files are only compatible with Emacs built with UCRT. MSVCRT is not supported.
+I offer `.dll` files for both gnu target, which pairs with MSYS2 UCRT; and gnullvm target, which pairs with MSYS2 CLANG*. Anyway, `x86_64-pc-windows-gnu` and `x86_64-pc-windows-gnullvm` are ABI compatible so mixture is all right. You may need to build yourself, if you use Emacs built with MSVCRT.
 
 ### Manually build
 
-1. Install Rust toolchain (On Windows, please target x86_64-pc-windows-gnu)
-2. (On Windows) Install MSYS2
+1. Install Rust toolchain
+2. (On Windows) Install MSYS2, and put `${MSYSTEM}/bin` to PATH to make libclang work
 3. `cargo build --release` to use ICU
 4. `cargo build --release --no-default-features -F windows` to use WinRT API
+
+It's possible to build for `*-pc-windows-gnullvm`, but manual adjustment of `-I` include directory, libclang target, link target and link sysroot (when cross compiling) is required. You may refer to the [CI script](https://github.com/Master-Hash/ewt-rs/blob/main/.github/workflows/build.yml).
 
 ## Adjustment
 
@@ -53,6 +55,7 @@ This crate handles String on char level instead of grapheme cluster level. Howev
 
 - [x] Try ICU Backend
 - [x] Find out why M-S-{F,B} doesn't select anything
+- [ ] Stop linking against libunwind.dll
 
 ## Credit
 
