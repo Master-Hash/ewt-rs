@@ -110,6 +110,7 @@ jobs:
         # Run only when having msystem variable
         if: ${{ matrix.job.msystem != '' }}
         with:
+          release: false
           update: true
           msystem: ${{ matrix.job.msystem }}
           pacboy: clang:p clang:c
