@@ -30,6 +30,30 @@ jobs:
               feature: windows,
             }
           - {
+              target: x86_64-pc-windows-msvc,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: icu_segmenter,
+            }
+          - {
+              target: x86_64-pc-windows-msvc,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: windows,
+            }
+          - {
+              target: aarch64-pc-windows-msvc,
+              os: windows-11-arm,
+              bname: ewt.dll,
+              feature: icu_segmenter,
+            }
+          - {
+              target: aarch64-pc-windows-msvc,
+              os: windows-11-arm,
+              bname: ewt.dll,
+              feature: windows,
+            }
+          - {
               target: x86_64-pc-windows-gnullvm,
               os: windows-2025,
               bname: ewt.dll,
@@ -98,7 +122,6 @@ jobs:
 
       - name: Show version information (Rust, cargo)
         run: |
-          rustup update
           rustup -V
           rustup toolchain list
           rustup target add ${{ matrix.job.target }}
