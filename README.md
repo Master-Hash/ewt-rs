@@ -14,7 +14,9 @@ Download from [Releases](https://github.com/Master-Hash/ewt-rs/releases), or [CI
 
 <!-- Please ignore the binary from Releases page. -->
 
-I offer `.dll` files for both gnu target, which pairs with MSYS2 UCRT; and gnullvm target, which pairs with MSYS2 CLANG*. Anyway, `x86_64-pc-windows-gnu` and `x86_64-pc-windows-gnullvm` are ABI compatible so mixture is all right. You may need to build yourself, if you use Emacs built with MSVCRT.
+I offer `.dll` files for msvc/gnu/gnullvm target, which are all ABI compatible, so mixture with either UCRT or CLANG64 Emacs is all right. You may need to build yourself, if you use Emacs built with MSVCRT.
+
+If you use gnullvm target binary, it links against `libunwind.dll`, so make sure it's included in PATH. It won't work if it's only included in `load-path` or same directory of the module dll.
 
 ### Manually build
 
