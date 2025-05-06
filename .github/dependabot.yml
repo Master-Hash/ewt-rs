@@ -8,7 +8,9 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
+      interval: cron
+      cronjob: "0 8 1 */3 *"
+      timezone: Etc/UTC
   - package-ecosystem: cargo
     directory: "/"
     allow:
