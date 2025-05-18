@@ -24,5 +24,7 @@ updates:
         update-types:
           - major
     schedule:
-      interval: "weekly"
+      interval: cron
+      cronjob: "0 8 1 */3 *"
+      timezone: Etc/UTC
     open-pull-requests-limit: 10
