@@ -16,6 +16,8 @@ use std::sync::LazyLock;
 #[cfg(feature = "windows")]
 use windows::Data::Text::SelectableWordsSegmenter;
 #[cfg(feature = "windows")]
+use windows::Win32::Globalization::{CP_UTF8, MB_ERR_INVALID_CHARS, MultiByteToWideChar};
+#[cfg(feature = "windows")]
 use windows::core::HSTRING;
 #[cfg(feature = "windows")]
 use windows::core::h;
@@ -110,7 +112,8 @@ unsafe extern "C" fn Femt__do_split_helper(
 
         #[cfg(feature = "windows")]
         let mut consCell = {
-            let param_hstring = HSTRING::from(param_u8);
+            // let param_hstring = HSTRING::from(param_u8);
+            let param_hstring = utf8_to_hstring(param_u8);
             let res = segmenter.GetTokens(&param_hstring).unwrap();
 
             let iConsCell = res.into_iter().map(|i| {
@@ -180,7 +183,8 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
 
         #[cfg(feature = "windows")]
         let (l, r) = {
-            let param_hstring = HSTRING::from(param_u8);
+            // let param_hstring = HSTRING::from(param_u8);
+            let param_hstring = utf8_to_hstring(param_u8);
             let res = segmenter
                 .GetTokenAt(&param_hstring, n.try_into().unwrap())
                 .unwrap();
@@ -225,4 +229,24 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
         };
         funcall(env, Qcons, 2, [l, r].as_mut_ptr())
     }
+}
+
+#[cfg(feature = "windows")]
+fn utf8_to_hstring(s: &str) -> HSTRING {
+    let wide_len =
+        unsafe { MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.as_bytes(), None) };
+
+    // assert!(wide_len > 0);
+
+    let mut buffer: Vec<u16> = vec![0; wide_len as usize];
+    let len_written = unsafe {
+        MultiByteToWideChar(
+            CP_UTF8,
+            MB_ERR_INVALID_CHARS,
+            s.as_bytes(),
+            Some(&mut buffer),
+        )
+    };
+
+    HSTRING::from_wide(&buffer)
 }
