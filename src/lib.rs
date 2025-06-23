@@ -8,6 +8,7 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
 #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
 use itertools::Itertools;
+use libc_alloc::LibcAlloc;
 use std::ffi::CStr;
 use std::os::raw;
 use std::ptr;
@@ -19,6 +20,9 @@ use windows::Data::Text::SelectableWordsSegmenter;
 use windows::core::HSTRING;
 #[cfg(feature = "windows")]
 use windows::core::h;
+
+#[global_allocator]
+static ALLOCATOR: LibcAlloc = LibcAlloc;
 
 #[cfg(feature = "windows")]
 static segmenter: LazyLock<SelectableWordsSegmenter> =

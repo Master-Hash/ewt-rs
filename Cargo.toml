@@ -15,6 +15,7 @@ windows = { version = "0.61.1", features = [
     "Foundation_Collections",
 ], optional = true }
 itertools = { version = "0.14.0", optional = true }
+libc_alloc = "1.0.7"
 
 [build-dependencies]
 bindgen = "0.72.0"
