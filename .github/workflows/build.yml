@@ -94,6 +94,20 @@ jobs:
               feature: icu_segmenter,
             }
           - {
+              target: x86_64-linux-android,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: icu_segmenter,
+              abi: x86_64,
+            }
+          - {
+              target: aarch64-linux-android,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: icu_segmenter,
+              abi: arm64-v8a,
+            }
+          - {
               target: x86_64-apple-darwin,
               os: macos-15,
               bname: libewt.dylib,
@@ -109,6 +123,10 @@ jobs:
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
+
+      - run: |
+          cargo install cargo-ndk
+        if: ${{ endsWith(matrix.job.target, 'android') }}
 
       - uses: actions/cache@v4
         with:
@@ -143,6 +161,13 @@ jobs:
           echo "${{ steps.msys2.outputs.msys2-location }}\clang64\bin" >> "$GITHUB_PATH"
         if: ${{ matrix.job.msystem != '' }}
 
+      # - run: |
+      #     echo "ANDROID_NDK_LATEST_HOME = ${ANDROID_NDK_LATEST_HOME}"
+      #     ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-config --libdir
+      #     echo "LIBCLANG_PATH=${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/lib" >> "$GITHUB_ENV"
+      #     echo "LD_LIBRARY_PATH=${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/lib" >> "$GITHUB_ENV"
+      #   if: ${{ endsWith(matrix.job.target, 'android') }}
+
       - run: |
           mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\lib\aarch64-w64-windows-gnu
           cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\20\lib\aarch64-w64-windows-gnu\libclang_rt.builtins.a
@@ -156,7 +181,19 @@ jobs:
           BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\20\include" --target=aarch64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
+          # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+          # CARGO_TARGET_X86_64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+          # CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
+          # BINDGEN_EXTRA_CLANG_ARGS_AARCH64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=aarch64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
+          # CARGO_TARGET_AARCH64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+          # CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
         run: cargo build --locked --release --target=${{ matrix.job.target }} --no-default-features -F ${{ matrix.job.feature }}
+        if: ${{ !endsWith(matrix.job.target, 'android') }}
+
+      - name: Build Android
+        run: |
+          cargo ndk --platform 22 --bindgen -t ${{ matrix.job.abi }} build --release
+        if: ${{ endsWith(matrix.job.target, 'android') }}
 
       - name: "Artifact upload"
         uses: actions/upload-artifact@master
