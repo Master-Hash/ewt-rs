@@ -98,14 +98,12 @@ jobs:
               os: ubuntu-24.04,
               bname: libewt.so,
               feature: icu_segmenter,
-              abi: x86_64,
             }
           - {
               target: aarch64-linux-android,
               os: ubuntu-24.04,
               bname: libewt.so,
               feature: icu_segmenter,
-              abi: arm64-v8a,
             }
           - {
               target: x86_64-apple-darwin,
@@ -193,7 +191,7 @@ jobs:
 
       - name: Build Android
         run: |
-          cargo ndk --platform 22 --bindgen -t ${{ matrix.job.abi }} build --release
+          cargo ndk -P 22 -t ${{ matrix.job.target }} build --release -vv
         if: ${{ endsWith(matrix.job.target, 'android') }}
 
       - name: "Artifact upload"
