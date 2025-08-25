@@ -12,7 +12,6 @@ use libc_alloc::LibcAlloc;
 use std::ffi::CStr;
 use std::os::raw;
 use std::ptr;
-#[cfg(feature = "windows")]
 use std::sync::LazyLock;
 #[cfg(feature = "windows")]
 use windows::Data::Text::SelectableWordsSegmenter;
@@ -28,8 +27,9 @@ static ALLOCATOR: LibcAlloc = LibcAlloc;
 static segmenter: LazyLock<SelectableWordsSegmenter> =
     LazyLock::new(|| SelectableWordsSegmenter::CreateWithLanguage(h!("zh-CN")).unwrap());
 
-// icu segmenter seems unable to be initialized in a static variable
-// Rc is used inside, so it is not Sync
+#[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+static segmenter_icu: LazyLock<icu_segmenter::WordSegmenterBorrowed> =
+    LazyLock::new(|| WordSegmenter::new_auto(WordBreakInvariantOptions::default()));
 
 #[unsafe(no_mangle)]
 #[allow(non_upper_case_globals)]
@@ -127,7 +127,6 @@ unsafe extern "C" fn Femt__do_split_helper(
         };
         #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
         let mut consCell = {
-            let segmenter_icu = WordSegmenter::new_auto(WordBreakInvariantOptions::default());
             let segments = segmenter_icu
                 .segment_str(param_u8)
                 .tuple_windows()
@@ -197,7 +196,6 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
         #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
         let (l, r) = {
             // Sadly WordSegmenter does not provide a way to get the nth token
-            let segmenter_icu = WordSegmenter::new_auto(WordBreakInvariantOptions::default());
             let segments = segmenter_icu
                 .segment_str(param_u8)
                 .tuple_windows()
