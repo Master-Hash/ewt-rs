@@ -18,7 +18,7 @@ itertools = { version = "0.14.0", optional = true }
 libc_alloc = "1.0.7"
 
 [build-dependencies]
-bindgen = "0.72.0"
+bindgen = "0.72.1"
 
 [profile.release]
 codegen-units = 1
