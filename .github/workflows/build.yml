@@ -113,13 +113,13 @@ jobs:
             }
           - {
               target: x86_64-apple-darwin,
-              os: macos-15,
+              os: macos-26,
               bname: libewt.dylib,
               feature: icu_segmenter,
             }
           - {
               target: aarch64-apple-darwin,
-              os: macos-15,
+              os: macos-26,
               bname: libewt.dylib,
               feature: icu_segmenter,
             }
