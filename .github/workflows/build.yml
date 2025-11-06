@@ -94,6 +94,12 @@ jobs:
               feature: icu_segmenter,
             }
           - {
+              target: riscv64gc-unknown-linux-gnu,
+              os: ubuntu-24.04-arm,
+              bname: libewt.so,
+              feature: icu_segmenter,
+            }
+          - {
               target: x86_64-linux-android,
               os: ubuntu-24.04,
               bname: libewt.so,
@@ -145,6 +151,11 @@ jobs:
           cargo -V
           rustc -V
 
+      - run: |
+          sudo apt-get update
+          sudo apt-get install crossbuild-essential-riscv64
+        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' }}
+
       - uses: msys2/setup-msys2@v2
         id: msys2
         # Run only when having msystem variable
@@ -180,6 +191,7 @@ jobs:
           BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\21\include" --target=aarch64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
+          CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc-13
           # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
           # CARGO_TARGET_X86_64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           # CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
