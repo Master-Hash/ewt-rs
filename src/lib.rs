@@ -9,7 +9,7 @@ use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
 #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
 use itertools::Itertools;
 use libc_alloc::LibcAlloc;
-use std::ffi::CStr;
+use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
 use std::sync::LazyLock;
@@ -39,6 +39,7 @@ pub static plugin_is_GPL_compatible: libc::c_int = 1;
 // that, since the C code won't know what code to call.
 // we'll also want to use `unsafe` because we need access to raw pointers
 #[unsafe(no_mangle)]
+#[allow(clippy::missing_safety_doc)]
 pub unsafe extern "C" fn emacs_module_init(runtime: *mut emacs_runtime) -> libc::c_int {
     unsafe {
         let env = (*runtime).get_environment.unwrap_unchecked()(runtime);
@@ -91,26 +92,18 @@ unsafe extern "C" fn Femt__do_split_helper(
     env: *mut emacs_env,
     nargs: isize,
     args: *mut emacs_value,
-    data: *mut raw::c_void,
+    _data: *mut raw::c_void,
 ) -> emacs_value {
     unsafe {
+        debug_assert_eq!(nargs, 1);
         let intern = (*env).intern.unwrap_unchecked();
         let funcall = (*env).funcall.unwrap_unchecked();
         let make_integer = (*env).make_integer.unwrap_unchecked();
-        let copy_string_contents = (*env).copy_string_contents.unwrap_unchecked();
 
         let Qcons = intern(env, c"cons".as_ptr());
         let Qvector = intern(env, c"vector".as_ptr());
 
-        let mut len: isize = 0;
-        let is_ok = copy_string_contents(env, *args, ptr::null_mut(), &mut len);
-        let mut buf = vec![0u8; len as usize];
-        let is_ok =
-            copy_string_contents(env, *args, buf.as_mut_ptr() as *mut raw::c_char, &mut len);
-
-        let param_u8 =
-            std::str::from_utf8_unchecked(CStr::from_bytes_with_nul_unchecked(&buf).to_bytes());
-        // let param_u8 = CStr::from_bytes_with_nul(&buf).unwrap().to_str().unwrap();
+        let param_u8 = copy_string(env, args).unwrap_unchecked();
 
         #[cfg(feature = "windows")]
         let mut consCell = {
@@ -128,7 +121,7 @@ unsafe extern "C" fn Femt__do_split_helper(
         #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
         let mut consCell = {
             let segments = segmenter_icu
-                .segment_str(param_u8)
+                .segment_str(&param_u8)
                 .tuple_windows()
                 .map(|(i, j)| &param_u8[i..j]);
             let ss = segments.map(|s| s.chars().count());
@@ -158,26 +151,18 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
     env: *mut emacs_env,
     nargs: isize,
     args: *mut emacs_value,
-    data: *mut raw::c_void,
+    _data: *mut raw::c_void,
 ) -> emacs_value {
     unsafe {
+        debug_assert_eq!(nargs, 2);
         let intern = (*env).intern.unwrap_unchecked();
         let funcall = (*env).funcall.unwrap_unchecked();
         let make_integer = (*env).make_integer.unwrap_unchecked();
         let extract_integer = (*env).extract_integer.unwrap_unchecked();
-        let copy_string_contents = (*env).copy_string_contents.unwrap_unchecked();
 
         let Qcons = intern(env, c"cons".as_ptr());
 
-        let mut len: isize = 0;
-        let is_ok = copy_string_contents(env, *args, ptr::null_mut(), &mut len);
-        let mut buf = vec![0u8; len as usize];
-        let is_ok =
-            copy_string_contents(env, *args, buf.as_mut_ptr() as *mut raw::c_char, &mut len);
-
-        let param_u8 =
-            std::str::from_utf8_unchecked(CStr::from_bytes_with_nul_unchecked(&buf).to_bytes());
-        // let param_u8 = CStr::from_bytes_with_nul(&buf).unwrap().to_str().unwrap();
+        let param_u8 = copy_string(env, args).unwrap_unchecked();
 
         let n = extract_integer(env, *args.offset(1));
 
@@ -197,7 +182,7 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
         let (l, r) = {
             // Sadly WordSegmenter does not provide a way to get the nth token
             let segments = segmenter_icu
-                .segment_str(param_u8)
+                .segment_str(&param_u8)
                 .tuple_windows()
                 .map(|(i, j)| &param_u8[i..j]);
             let mut ss = segments.map(|s| s.chars().count());
@@ -226,5 +211,26 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
             }
         };
         funcall(env, Qcons, 2, [l, r].as_mut_ptr())
+    }
+}
+
+fn copy_string(env: *mut emacs_env_29, args: *mut *mut emacs_value_tag) -> Result<String, ()> {
+    unsafe {
+        let copy_string_contents = (*env).copy_string_contents.unwrap_unchecked();
+        let mut len: isize = 0;
+        let is_ok = copy_string_contents(env, *args, ptr::null_mut(), &mut len);
+        if !is_ok {
+            return Err(());
+        }
+        let mut buf = vec![0u8; len as usize];
+        let is_ok =
+            copy_string_contents(env, *args, buf.as_mut_ptr() as *mut raw::c_char, &mut len);
+        if !is_ok {
+            return Err(());
+        }
+
+        Ok(String::from_utf8_unchecked(
+            CString::from_vec_with_nul_unchecked(buf).into_bytes(),
+        ))
     }
 }

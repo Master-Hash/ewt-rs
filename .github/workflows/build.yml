@@ -13,6 +13,8 @@ jobs:
   build:
     name: ${{ matrix.job.target }} (${{ matrix.job.os }})
     runs-on: ${{ matrix.job.os }}
+    # env:
+    #   RUSTFLAGS: -Dwarnings
     strategy:
       fail-fast: false
       matrix:
