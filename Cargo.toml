@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 icu_segmenter = { version = "2.1.2", optional = true }
-libc = "0.2.178"
+libc = "0.2.179"
 windows = { version = "0.62.2", features = [
     "Data_Text",
     "Foundation_Collections",
