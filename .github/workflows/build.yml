@@ -33,25 +33,25 @@ jobs:
             }
           - {
               target: x86_64-pc-windows-msvc,
-              os: windows-2025,
+              os: windows-11-arm,
               bname: ewt.dll,
               feature: icu_segmenter,
             }
           - {
               target: x86_64-pc-windows-msvc,
-              os: windows-2025,
+              os: windows-11-arm,
               bname: ewt.dll,
               feature: windows,
             }
           - {
               target: aarch64-pc-windows-msvc,
-              os: windows-2025,
+              os: windows-11-arm,
               bname: ewt.dll,
               feature: icu_segmenter,
             }
           - {
               target: aarch64-pc-windows-msvc,
-              os: windows-2025,
+              os: windows-11-arm,
               bname: ewt.dll,
               feature: windows,
             }
