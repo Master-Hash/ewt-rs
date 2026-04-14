@@ -22,8 +22,9 @@ If you use gnullvm target binary, it links against `libunwind.dll`, so make sure
 
 1. Install Rust toolchain
 2. (On Windows) Install MSYS2, and put `${MSYSTEM}/bin` to PATH to make libclang work
-3. `cargo build --release` to use ICU
-4. `cargo build --release --no-default-features -F windows` to use WinRT API
+3. `cargo build --release` to use ICU via `icu_segmenter`
+4. `cargo build --release --no-default-features -F rust_icu_ubrk` to use ICU via `rust_icu_ubrk`
+5. `cargo build --release --no-default-features -F windows` to use WinRT API
 
 It's possible to build for `*-pc-windows-gnullvm`, but manual adjustment of `-I` include directory, libclang target, link target and link sysroot (when cross compiling) is required. You may refer to the [CI script](https://github.com/Master-Hash/ewt-rs/blob/main/.github/workflows/build.yml).
 

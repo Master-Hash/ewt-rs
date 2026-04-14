@@ -44,6 +44,12 @@ jobs:
               feature: windows,
             }
           - {
+              target: x86_64-pc-windows-msvc,
+              os: windows-11-arm,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: aarch64-pc-windows-msvc,
               os: windows-11-arm,
               bname: ewt.dll,
@@ -54,6 +60,12 @@ jobs:
               os: windows-11-arm,
               bname: ewt.dll,
               feature: windows,
+            }
+          - {
+              target: aarch64-pc-windows-msvc,
+              os: windows-11-arm,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
@@ -114,6 +126,36 @@ jobs:
               feature: icu_segmenter,
             }
           - {
+              target: x86_64-unknown-linux-gnu,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-24.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: riscv64gc-unknown-linux-gnu,
+              os: ubuntu-24.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: x86_64-linux-android,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-linux-android,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: x86_64-apple-darwin,
               os: macos-26,
               bname: libewt.dylib,
@@ -124,6 +166,18 @@ jobs:
               os: macos-26,
               bname: libewt.dylib,
               feature: icu_segmenter,
+            }
+          - {
+              target: x86_64-apple-darwin,
+              os: macos-26,
+              bname: libewt.dylib,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-apple-darwin,
+              os: macos-26,
+              bname: libewt.dylib,
+              feature: rust_icu_ubrk,
             }
 
     steps:

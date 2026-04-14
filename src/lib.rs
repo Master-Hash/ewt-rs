@@ -12,6 +12,7 @@ use libc_alloc::LibcAlloc;
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
+#[cfg(any(feature = "windows", feature = "icu_segmenter"))]
 use std::sync::LazyLock;
 #[cfg(feature = "windows")]
 use windows::Data::Text::SelectableWordsSegmenter;
@@ -30,6 +31,33 @@ static segmenter: LazyLock<SelectableWordsSegmenter> =
 #[cfg(feature = "icu_segmenter")]
 static segmenter_icu: LazyLock<icu_segmenter::WordSegmenterBorrowed> =
     LazyLock::new(|| WordSegmenter::new_auto(WordBreakInvariantOptions::default()));
+
+#[cfg(feature = "rust_icu_ubrk")]
+use rust_icu_sys::UBreakIteratorType::UBRK_WORD;
+#[cfg(feature = "rust_icu_ubrk")]
+use rust_icu_ubrk::UBreakIterator;
+
+#[cfg(feature = "rust_icu_ubrk")]
+fn rust_icu_ubrk_word_boundaries(text: &str) -> Vec<usize> {
+    let mut break_iter = UBreakIterator::try_new(UBRK_WORD, "zh", text).unwrap();
+
+    let utf16_boundaries: Vec<usize> = std::iter::once(break_iter.first())
+        .chain(&mut break_iter)
+        .map(|b| b as usize)
+        .collect();
+
+    let utf16_to_char: Vec<usize> = text
+        .chars()
+        .enumerate()
+        .flat_map(|(char_idx, ch)| std::iter::repeat_n(char_idx, ch.len_utf16()))
+        .chain(std::iter::once(text.chars().count()))
+        .collect();
+
+    utf16_boundaries
+        .into_iter()
+        .map(|b| utf16_to_char[b])
+        .collect()
+}
 
 #[unsafe(no_mangle)]
 #[allow(non_upper_case_globals)]
@@ -141,6 +169,18 @@ unsafe extern "C" fn Femt__do_split_helper(
                 });
             iConsCell.collect::<Vec<_>>()
         };
+        #[cfg(feature = "rust_icu_ubrk")]
+        let mut consCell = {
+            let segments = rust_icu_ubrk_word_boundaries(&param_u8)
+                .into_iter()
+                .tuple_windows();
+            let iConsCell = segments.map(|(l, r)| {
+                let l = make_integer(env, l as i64);
+                let r = make_integer(env, r as i64);
+                funcall(env, Qcons, 2, [l, r].as_mut_ptr())
+            });
+            iConsCell.collect::<Vec<_>>()
+        };
         let l = consCell.len();
         let ddd = consCell.as_mut_ptr();
         funcall(env, Qvector, l as isize, ddd)
@@ -202,6 +242,27 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
             });
             match iConsCell {
                 // Seems all the program will be panic if we reach here
+                Ok(_) => unreachable!(),
+                Err((l, r)) => {
+                    let l = make_integer(env, l as i64);
+                    let r = make_integer(env, r as i64);
+                    (l, r)
+                }
+            }
+        };
+        #[cfg(feature = "rust_icu_ubrk")]
+        let (l, r) = {
+            let mut segments = rust_icu_ubrk_word_boundaries(&param_u8)
+                .into_iter()
+                .tuple_windows();
+            let iConsCell = segments.try_fold(0usize, |_, (l, r)| {
+                if n < r.try_into().unwrap() {
+                    Err((l, r))
+                } else {
+                    Ok(r)
+                }
+            });
+            match iConsCell {
                 Ok(_) => unreachable!(),
                 Err((l, r)) => {
                     let l = make_integer(env, l as i64);
