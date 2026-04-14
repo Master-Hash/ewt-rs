@@ -282,7 +282,7 @@ jobs:
       - name: "Artifact upload"
         uses: actions/upload-artifact@master
         with:
-          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{ startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' }}
+          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{ startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' || '' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 
