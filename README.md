@@ -1,8 +1,6 @@
 # ewt-rs
 
-Emacs Tokenizer tokenizing CJK words with WinRT API or ICU.
-
-EWT stands for Emacs Windows Tokenizer. But in fact it works on all platforms.
+Emacs Tokenizer tokenizing CJK words with WinRT API or ICU on all platforms, including Windows, MacOS and Linux.
 
 ## Installation
 
@@ -44,17 +42,17 @@ I have to use unsafe extern "C" all the way to write Rust binding. The safety no
 
 ## WinRT API vs ICU
 
-Personally I recommand WinRT API for Simplified Chinese and ICU for Traditional Chinese.
+Personally I recommend WinRT API for Simplified Chinese and ICU for Traditional Chinese.
 
-| WinRT API | ICU |
-|-------|-------|
-| '有\|异曲同工\|之\|妙' | '有异\|曲\|同工\|之\|妙' |
-| '有\|異\|曲\|同工\|之\|妙' | '有\|異曲同工\|之\|妙' |
-| '丧心病狂\|的\|异想天开' | '丧心病狂\|的\|异\|想\|天\|开' |
+| WinRT API           | ICU                   |
+|---------------------|-----------------------|
+| '有\|异曲同工\|之\|妙'     | '有异\|曲\|同工\|之\|妙'     |
+| '有\|異\|曲\|同工\|之\|妙' | '有\|異曲同工\|之\|妙'       |
+| '丧心病狂\|的\|异想天开'     | '丧心病狂\|的\|异\|想\|天\|开' |
 
 ## Note on UTF-8 Grapheme Cluster
 
-This crate handles String on char level instead of grapheme cluster level. However, this causes no problem, probally because emt.el only use the helper function when moving in CJK characters.
+This crate handles String on char level instead of grapheme cluster level. However, this causes no problem, probably because emt.el only use the helper function when moving in CJK characters.
 
 ## Future Work
 
