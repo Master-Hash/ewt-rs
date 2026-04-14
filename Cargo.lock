@@ -455,7 +455,7 @@ dependencies = [
 [[package]]
 name = "rust_icu_release"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=a1a7ed0#a1a7ed08b9e26f18f428d546ca2ef2582c427b1a"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=1e56cc4#1e56cc46eedade5dfa83d7bbbd7f648fadc9c581"
 dependencies = [
  "anyhow",
 ]
@@ -463,14 +463,14 @@ dependencies = [
 [[package]]
 name = "rust_icu_sys"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=a1a7ed0#a1a7ed08b9e26f18f428d546ca2ef2582c427b1a"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=1e56cc4#1e56cc46eedade5dfa83d7bbbd7f648fadc9c581"
 dependencies = [
  "anyhow",
  "bindgen 0.69.5",
  "lazy_static",
  "libc",
  "paste",
- "rust_icu_release 5.6.0 (git+https://github.com/Master-Hash/rust_icu.git?rev=a1a7ed0)",
+ "rust_icu_release 5.6.0 (git+https://github.com/Master-Hash/rust_icu.git?rev=1e56cc4)",
 ]
 
 [[package]]

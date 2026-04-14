@@ -161,18 +161,6 @@ jobs:
               bname: libewt.dylib,
               feature: icu_segmenter,
             }
-          - {
-              target: x86_64-apple-darwin,
-              os: macos-26,
-              bname: libewt.dylib,
-              feature: rust_icu_ubrk,
-            }
-          - {
-              target: aarch64-apple-darwin,
-              os: macos-26,
-              bname: libewt.dylib,
-              feature: rust_icu_ubrk,
-            }
 
     steps:
       - name: Checkout source code
