@@ -32,6 +32,14 @@ jobs:
               feature: windows,
             }
           - {
+              target: x86_64-pc-windows-gnu,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
+              msystem: ucrt64,
+              hsystem: ucrt64,
+            }
+          - {
               target: x86_64-pc-windows-msvc,
               os: windows-11-arm,
               bname: ewt.dll,
@@ -61,6 +69,7 @@ jobs:
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clang64,
+              hsystem: clang64,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
@@ -68,6 +77,15 @@ jobs:
               bname: ewt.dll,
               feature: windows,
               msystem: clang64,
+              hsystem: clang64,
+            }
+          - {
+              target: x86_64-pc-windows-gnullvm,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
+              msystem: clang64,
+              hsystem: clang64,
             }
           - {
               target: aarch64-pc-windows-gnullvm,
@@ -75,6 +93,7 @@ jobs:
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clangarm64,
+              hsystem: clang64,
             }
           - {
               target: aarch64-pc-windows-gnullvm,
@@ -82,6 +101,15 @@ jobs:
               bname: ewt.dll,
               feature: windows,
               msystem: clangarm64,
+              hsystem: clang64,
+            }
+          - {
+              target: aarch64-pc-windows-gnullvm,
+              os: windows-11-arm,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
+              msystem: clangarm64,
+              hsystem: clangarm64,
             }
           - {
               target: x86_64-unknown-linux-gnu,
@@ -114,6 +142,42 @@ jobs:
               feature: icu_segmenter,
             }
           - {
+              target: x86_64-unknown-linux-gnu,
+              os: ubuntu-22.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-22.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: x86_64-unknown-linux-gnu,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-24.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: x86_64-linux-android,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-linux-android,
+              os: ubuntu-24.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: x86_64-apple-darwin,
               os: macos-26,
               bname: libewt.dylib,
@@ -138,7 +202,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ matrix.job.feature }}
+          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ matrix.job.feature }}-${{ matrix.job.os }}
 
       - uses: taiki-e/install-action@v2
         with:
@@ -163,16 +227,23 @@ jobs:
         # Run only when having msystem variable
         if: ${{ matrix.job.msystem != '' }}
         with:
-          release: false
+          release: ${{ matrix.job.os == 'windows-11-arm' }}
           update: true
           msystem: ${{ matrix.job.msystem }}
-          pacboy: clang:p clang:c
+          pacboy: clang:p pkgconf:p ${{ matrix.job.os == 'windows-2025' && matrix.job.target == 'aarch64-pc-windows-gnullvm' && 'clang:c pkgconf:c' || '' }} ${{ matrix.job.feature == 'rust_icu_ubrk' && 'icu:p' || '' }}
 
       - run: |
-          echo "LIBCLANG_PATH=${{ steps.msys2.outputs.msys2-location }}\clang64\bin\libclang.dll" >> "$GITHUB_ENV"
-          echo "${{ steps.msys2.outputs.msys2-location }}\clang64\bin" >> "$GITHUB_PATH"
-        if: ${{ matrix.job.msystem != '' }}
+          echo "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        if: ${{ matrix.job.hsystem != '' }}
 
+      - run: |
+          where.exe clang
+        if: ${{ matrix.job.hsystem != '' }}
+
+      - run: |
+          where.exe icu-config
+          where.exe pkg-config
+        if: ${{ matrix.job.hsystem != '' && matrix.job.feature == 'rust_icu_ubrk' }}
       # - run: |
       #     echo "ANDROID_NDK_LATEST_HOME = ${ANDROID_NDK_LATEST_HOME}"
       #     ${ANDROID_NDK_LATEST_HOME}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-config --libdir
@@ -183,15 +254,15 @@ jobs:
       - run: |
           mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\lib\aarch64-w64-windows-gnu
           cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\22\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\lib\aarch64-w64-windows-gnu\libclang_rt.builtins.a
-        if: ${{ matrix.job.msystem == 'clangarm64' }}
+        if: ${{ matrix.job.msystem == 'clangarm64' && matrix.job.os == 'windows-2025' }}
 
       - name: Build
         env:
           BINDGEN_EXTRA_CLANG_ARGS_X86_64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clang64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\include" --target=x86_64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clang64
-          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\clang.exe
           CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
           BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\22\include" --target=aarch64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
-          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\clang.exe
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc-13
           # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
@@ -205,13 +276,13 @@ jobs:
 
       - name: Build Android
         run: |
-          cargo ndk -P 22 -t ${{ matrix.job.target }} build --release -vv
+          cargo ndk -P 32 -t ${{ matrix.job.target }} build --release -vv
         if: ${{ endsWith(matrix.job.target, 'android') }}
 
       - name: "Artifact upload"
         uses: actions/upload-artifact@master
         with:
-          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}
+          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{ startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' || '' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 

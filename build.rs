@@ -4,6 +4,20 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    let features = [
+        std::env::var("CARGO_FEATURE_ICU_SEGMENTER").is_ok(),
+        std::env::var("CARGO_FEATURE_WINDOWS").is_ok(),
+        std::env::var("CARGO_FEATURE_RUST_ICU_UBRK").is_ok(),
+    ];
+
+    let enabled_count = features.iter().filter(|&&x| x).count();
+
+    if enabled_count > 1 {
+        panic!(
+            "Error: Features 'icu_segmenter', 'windows', and 'rust_icu_ubrk' are mutually exclusive. Choose only one.\n"
+        );
+    }
+
     let bindings = bindgen::Builder::default()
         // I just imported it straight from where it was on my computer.
         // If we were building a real module we might not want to do this!

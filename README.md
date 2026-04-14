@@ -2,7 +2,7 @@
 
 Emacs Tokenizer tokenizing CJK words with WinRT API or ICU.
 
-EWT stands for Emacs Windows Tokenizer. But it works on all platforms, if built with [ICU](https://github.com/unicode-org/icu4x).
+EWT stands for Emacs Windows Tokenizer. But in fact it works on all platforms.
 
 ## Installation
 
@@ -18,12 +18,15 @@ I offer `.dll` files for msvc/gnu/gnullvm target, which are all ABI compatible, 
 
 If you use gnullvm target binary, it links against `libunwind.dll`, so make sure it's included in PATH. It won't work if it's only included in `load-path` or same directory of the module dll.
 
+If you use binary built with `rust_icu_ubrk` feature, it's only compatible with ICU of specific version. If you're not Ubuntu user, compile yourself instead.
+
 ### Manually build
 
 1. Install Rust toolchain
 2. (On Windows) Install MSYS2, and put `${MSYSTEM}/bin` to PATH to make libclang work
-3. `cargo build --release` to use ICU
-4. `cargo build --release --no-default-features -F windows` to use WinRT API
+3. `cargo build --release` to use ICU via `icu_segmenter`
+4. `cargo build --release --no-default-features -F rust_icu_ubrk` to use ICU via `rust_icu_ubrk`
+5. `cargo build --release --no-default-features -F windows` to use WinRT API
 
 It's possible to build for `*-pc-windows-gnullvm`, but manual adjustment of `-I` include directory, libclang target, link target and link sysroot (when cross compiling) is required. You may refer to the [CI script](https://github.com/Master-Hash/ewt-rs/blob/main/.github/workflows/build.yml).
 
@@ -57,6 +60,7 @@ This crate handles String on char level instead of grapheme cluster level. Howev
 
 - [x] Try ICU Backend
 - [x] Find out why M-S-{F,B} doesn't select anything
+- [x] Link against system icu
 - [ ] Stop linking against libunwind.dll
 
 ## Credit
