@@ -35,4 +35,4 @@ icu_segmenter = ["dep:icu_segmenter", "dep:itertools"]
 rust_icu_ubrk = ["dep:rust_icu_ubrk", "dep:rust_icu_sys", "dep:itertools"]
 
 [patch.crates-io]
-rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "1e56cc4" }
+rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "a1a7ed0" }
