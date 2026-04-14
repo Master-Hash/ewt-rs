@@ -138,12 +138,6 @@ jobs:
               feature: rust_icu_ubrk,
             }
           - {
-              target: riscv64gc-unknown-linux-gnu,
-              os: ubuntu-24.04-arm,
-              bname: libewt.so,
-              feature: rust_icu_ubrk,
-            }
-          - {
               target: x86_64-linux-android,
               os: ubuntu-24.04,
               bname: libewt.so,
@@ -259,7 +253,7 @@ jobs:
 
       - name: Build Android
         run: |
-          cargo ndk -P 22 -t ${{ matrix.job.target }} build --release -vv
+          cargo ndk -P 32 -t ${{ matrix.job.target }} build --release -vv
         if: ${{ endsWith(matrix.job.target, 'android') }}
 
       - name: "Artifact upload"
