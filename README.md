@@ -2,7 +2,7 @@
 
 Emacs Tokenizer tokenizing CJK words with WinRT API or ICU.
 
-EWT stands for Emacs Windows Tokenizer. But it works on all platforms, if built with [ICU](https://github.com/unicode-org/icu4x).
+EWT stands for Emacs Windows Tokenizer. But in fact it works on all platforms.
 
 ## Installation
 
@@ -17,6 +17,8 @@ Download from [Releases](https://github.com/Master-Hash/ewt-rs/releases), or [CI
 I offer `.dll` files for msvc/gnu/gnullvm target, which are all ABI compatible, so mixture with either UCRT or CLANG64 Emacs is all right. You may need to build yourself, if you use Emacs built with MSVCRT.
 
 If you use gnullvm target binary, it links against `libunwind.dll`, so make sure it's included in PATH. It won't work if it's only included in `load-path` or same directory of the module dll.
+
+If you use binary built with `rust_icu_ubrk` feature, it's only compatible with ICU of specific version. If you're not Ubuntu user, compile yourself instead.
 
 ### Manually build
 
@@ -58,6 +60,7 @@ This crate handles String on char level instead of grapheme cluster level. Howev
 
 - [x] Try ICU Backend
 - [x] Find out why M-S-{F,B} doesn't select anything
+- [x] Link against system icu
 - [ ] Stop linking against libunwind.dll
 
 ## Credit
