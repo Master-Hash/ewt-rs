@@ -15,7 +15,6 @@ use rust_icu_sys::UBreakIteratorType::UBRK_WORD;
 use rust_icu_ubrk::UBreakIterator;
 use std::ffi::CString;
 use std::os::raw;
-use std::ptr;
 #[cfg(any(feature = "windows", feature = "icu_segmenter"))]
 use std::sync::LazyLock;
 #[cfg(feature = "windows")]
@@ -278,7 +277,7 @@ fn copy_string(env: *mut emacs_env_29, args: *mut *mut emacs_value_tag) -> Resul
     unsafe {
         let copy_string_contents = (*env).copy_string_contents.unwrap_unchecked();
         let mut len: isize = 0;
-        let is_ok = copy_string_contents(env, *args, ptr::null_mut(), &mut len);
+        let is_ok = copy_string_contents(env, *args, std::ptr::null_mut(), &mut len);
         if !is_ok {
             return Err(());
         }
