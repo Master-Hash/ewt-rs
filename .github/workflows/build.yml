@@ -226,6 +226,8 @@ jobs:
         if: ${{ matrix.job.msystem != '' }}
 
       - run: |
+          echo $env:PATH
+          dir "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin"
           where.exe clang
         if: ${{ matrix.job.hsystem != '' }}
 
