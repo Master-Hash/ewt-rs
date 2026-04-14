@@ -210,7 +210,7 @@ jobs:
           release: false
           update: true
           msystem: ${{ matrix.job.msystem }}
-          pacboy: clang:p clang:c ${{ matrix.job.feature == 'rust_icu_ubrk' && 'icu:p' || '' }}
+          pacboy: clang:p clang:c ${{ matrix.job.feature == 'rust_icu_ubrk' && 'icu:p pkgconf:p' || '' }}
 
       - run: |
           echo "LIBCLANG_PATH=${{ steps.msys2.outputs.msys2-location }}\clang64\bin\libclang.dll" >> "$GITHUB_ENV"
