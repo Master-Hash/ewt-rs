@@ -247,10 +247,10 @@ jobs:
       - name: Build
         env:
           BINDGEN_EXTRA_CLANG_ARGS_X86_64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clang64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\include" --target=x86_64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clang64
-          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\clang.exe
           CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
           BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\22\include" --target=aarch64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
-          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\clang64\bin\clang.exe
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\clang.exe
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc-13
           # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
