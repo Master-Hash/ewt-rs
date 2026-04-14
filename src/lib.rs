@@ -9,6 +9,10 @@ use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
 #[cfg(any(feature = "icu_segmenter", feature = "rust_icu_ubrk"))]
 use itertools::Itertools;
 use libc_alloc::LibcAlloc;
+#[cfg(feature = "rust_icu_ubrk")]
+use rust_icu_sys::UBreakIteratorType::UBRK_WORD;
+#[cfg(feature = "rust_icu_ubrk")]
+use rust_icu_ubrk::UBreakIterator;
 use std::ffi::CString;
 use std::os::raw;
 use std::ptr;
@@ -31,11 +35,6 @@ static segmenter: LazyLock<SelectableWordsSegmenter> =
 #[cfg(feature = "icu_segmenter")]
 static segmenter_icu: LazyLock<icu_segmenter::WordSegmenterBorrowed> =
     LazyLock::new(|| WordSegmenter::new_auto(WordBreakInvariantOptions::default()));
-
-#[cfg(feature = "rust_icu_ubrk")]
-use rust_icu_sys::UBreakIteratorType::UBRK_WORD;
-#[cfg(feature = "rust_icu_ubrk")]
-use rust_icu_ubrk::UBreakIterator;
 
 #[cfg(feature = "rust_icu_ubrk")]
 fn rust_icu_ubrk_word_boundaries(text: &str) -> Vec<usize> {
@@ -63,7 +62,7 @@ fn rust_icu_ubrk_word_boundaries(text: &str) -> Vec<usize> {
 #[allow(non_upper_case_globals)]
 pub static plugin_is_GPL_compatible: libc::c_int = 1;
 
-// ordinarily the Rust compiler will mangle funciton names. we don't want to do
+// ordinarily the Rust compiler will mangle function names. we don't want to do
 // that, since the C code won't know what code to call.
 // we'll also want to use `unsafe` because we need access to raw pointers
 #[unsafe(no_mangle)]
@@ -293,5 +292,92 @@ fn copy_string(env: *mut emacs_env_29, args: *mut *mut emacs_value_tag) -> Resul
         Ok(String::from_utf8_unchecked(
             CString::from_vec_with_nul_unchecked(buf).into_bytes(),
         ))
+    }
+}
+
+#[cfg(test)]
+fn all_single_char_tokens(tokens: &[String]) -> bool {
+    tokens.iter().all(|t| t.chars().count() == 1)
+}
+
+#[cfg(all(test, feature = "icu_segmenter"))]
+fn tokenize_with_icu_segmenter(text: &str) -> Vec<String> {
+    segmenter_icu
+        .segment_str(text)
+        .tuple_windows()
+        .map(|(i, j)| text[i..j].to_string())
+        .collect()
+}
+
+#[cfg(all(test, feature = "rust_icu_ubrk"))]
+fn tokenize_with_rust_icu_ubrk(text: &str) -> Vec<String> {
+    let boundaries = rust_icu_ubrk_word_boundaries(text);
+    let chars: Vec<char> = text.chars().collect();
+    boundaries
+        .windows(2)
+        .map(|w| chars[w[0]..w[1]].iter().collect::<String>())
+        .collect()
+}
+
+#[cfg(all(test, feature = "windows"))]
+fn tokenize_with_windows_rt(text: &str) -> Vec<String> {
+    let text_hstring = HSTRING::from(text);
+    let chars: Vec<char> = text.chars().collect();
+    segmenter
+        .GetTokens(&text_hstring)
+        .unwrap()
+        .into_iter()
+        .map(|token| {
+            let segment = token.SourceTextSegment().unwrap();
+            let l = segment.StartPosition as usize;
+            let r = (segment.StartPosition + segment.Length) as usize;
+            chars[l..r].iter().collect::<String>()
+        })
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const IDIOMS: [&str; 4] = ["天荒地老", "丧心病狂", "异曲同工", "異曲同工"];
+
+    #[cfg(feature = "icu_segmenter")]
+    #[test]
+    fn idioms_are_not_all_single_chars_with_icu_segmenter() {
+        for idiom in IDIOMS {
+            let tokens = tokenize_with_icu_segmenter(idiom);
+            println!("Tokens for idiom {:?}: {:?}", idiom, tokens);
+            assert!(
+                !all_single_char_tokens(&tokens),
+                "icu_segmenter split idiom into single-char tokens: {idiom:?} -> {tokens:?}"
+            );
+        }
+    }
+
+    #[cfg(feature = "rust_icu_ubrk")]
+    #[test]
+    fn idioms_are_not_all_single_chars_with_rust_icu_ubrk() {
+        for idiom in IDIOMS {
+            let tokens = tokenize_with_rust_icu_ubrk(idiom);
+            println!("Tokens for idiom {:?}: {:?}", idiom, tokens);
+            assert!(
+                !all_single_char_tokens(&tokens),
+                "rust_icu_ubrk split idiom into single-char tokens: {idiom:?} -> {tokens:?}"
+            );
+        }
+    }
+
+    #[cfg(feature = "windows")]
+    #[test]
+    fn idioms_are_not_all_single_chars_with_windows_rt() {
+        for idiom in IDIOMS {
+            let tokens = tokenize_with_windows_rt(idiom);
+            println!("Tokens for idiom {:?}: {:?}", idiom, tokens);
+            assert!(
+                !all_single_char_tokens(&tokens),
+                "Windows RT tokenizer split idiom into single-char tokens: {idiom:?} -> {tokens:?}"
+            );
+        }
     }
 }
