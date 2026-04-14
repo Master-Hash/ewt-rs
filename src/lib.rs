@@ -4,9 +4,9 @@
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-#[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+#[cfg(feature = "icu_segmenter")]
 use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
-#[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+#[cfg(any(feature = "icu_segmenter", feature = "rust_icu_ubrk"))]
 use itertools::Itertools;
 use libc_alloc::LibcAlloc;
 use std::ffi::CString;
@@ -27,7 +27,7 @@ static ALLOCATOR: LibcAlloc = LibcAlloc;
 static segmenter: LazyLock<SelectableWordsSegmenter> =
     LazyLock::new(|| SelectableWordsSegmenter::CreateWithLanguage(h!("zh-CN")).unwrap());
 
-#[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+#[cfg(feature = "icu_segmenter")]
 static segmenter_icu: LazyLock<icu_segmenter::WordSegmenterBorrowed> =
     LazyLock::new(|| WordSegmenter::new_auto(WordBreakInvariantOptions::default()));
 
@@ -118,7 +118,7 @@ unsafe extern "C" fn Femt__do_split_helper(
             });
             iConsCell.collect::<Vec<_>>()
         };
-        #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+        #[cfg(feature = "icu_segmenter")]
         let mut consCell = {
             let segments = segmenter_icu
                 .segment_str(&param_u8)
@@ -178,7 +178,7 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
             let r = make_integer(env, (segment.StartPosition + segment.Length).into());
             (l, r)
         };
-        #[cfg(all(not(feature = "windows"), feature = "icu_segmenter"))]
+        #[cfg(feature = "icu_segmenter")]
         let (l, r) = {
             // Sadly WordSegmenter does not provide a way to get the nth token
             let segments = segmenter_icu
