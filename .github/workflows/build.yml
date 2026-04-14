@@ -143,6 +143,18 @@ jobs:
             }
           - {
               target: x86_64-unknown-linux-gnu,
+              os: ubuntu-22.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-22.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: x86_64-unknown-linux-gnu,
               os: ubuntu-24.04,
               bname: libewt.so,
               feature: rust_icu_ubrk,
@@ -190,7 +202,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ matrix.job.feature }}
+          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ matrix.job.feature }}-${{ matrix.job.os }}
 
       - uses: taiki-e/install-action@v2
         with:
@@ -270,7 +282,7 @@ jobs:
       - name: "Artifact upload"
         uses: actions/upload-artifact@master
         with:
-          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}
+          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{ startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 
