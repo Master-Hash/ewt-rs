@@ -221,13 +221,10 @@ jobs:
           pacboy: clang:p pkgconf:p ${{ matrix.job.os == 'windows-2025' && matrix.job.target == 'aarch64-pc-windows-gnullvm' && 'clang:c pkgconf:c' || '' }} ${{ matrix.job.feature == 'rust_icu_ubrk' && 'icu:p' || '' }}
 
       - run: |
-          echo "LIBCLANG_PATH=${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\libclang.dll" >> "$GITHUB_ENV"
-          echo "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin" >> "$GITHUB_PATH"
-        if: ${{ matrix.job.msystem != '' }}
+          echo "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        if: ${{ matrix.job.hsystem != '' }}
 
       - run: |
-          echo $env:PATH
-          dir "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin"
           where.exe clang
         if: ${{ matrix.job.hsystem != '' }}
 
