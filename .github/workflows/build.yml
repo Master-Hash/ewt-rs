@@ -32,6 +32,12 @@ jobs:
               feature: windows,
             }
           - {
+              target: x86_64-pc-windows-gnu,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: x86_64-pc-windows-msvc,
               os: windows-11-arm,
               bname: ewt.dll,
@@ -44,12 +50,6 @@ jobs:
               feature: windows,
             }
           - {
-              target: x86_64-pc-windows-msvc,
-              os: windows-11-arm,
-              bname: ewt.dll,
-              feature: rust_icu_ubrk,
-            }
-          - {
               target: aarch64-pc-windows-msvc,
               os: windows-11-arm,
               bname: ewt.dll,
@@ -60,12 +60,6 @@ jobs:
               os: windows-11-arm,
               bname: ewt.dll,
               feature: windows,
-            }
-          - {
-              target: aarch64-pc-windows-msvc,
-              os: windows-11-arm,
-              bname: ewt.dll,
-              feature: rust_icu_ubrk,
             }
           - {
               target: x86_64-pc-windows-gnullvm,
@@ -79,6 +73,13 @@ jobs:
               os: windows-2025,
               bname: ewt.dll,
               feature: windows,
+              msystem: clang64,
+            }
+          - {
+              target: x86_64-pc-windows-gnullvm,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
               msystem: clang64,
             }
           - {
@@ -93,6 +94,13 @@ jobs:
               os: windows-2025,
               bname: ewt.dll,
               feature: windows,
+              msystem: clangarm64,
+            }
+          - {
+              target: aarch64-pc-windows-gnullvm,
+              os: windows-2025,
+              bname: ewt.dll,
+              feature: rust_icu_ubrk,
               msystem: clangarm64,
             }
           - {
@@ -202,7 +210,7 @@ jobs:
           release: false
           update: true
           msystem: ${{ matrix.job.msystem }}
-          pacboy: clang:p clang:c
+          pacboy: clang:p clang:c ${{ matrix.job.feature == 'rust_icu_ubrk' && 'icu:p' || '' }}
 
       - run: |
           echo "LIBCLANG_PATH=${{ steps.msys2.outputs.msys2-location }}\clang64\bin\libclang.dll" >> "$GITHUB_ENV"
