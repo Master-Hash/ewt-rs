@@ -55,7 +55,7 @@ jobs:
               target: x86_64-pc-windows-msvc,
               os: windows-11-arm,
               bname: ewt.dll,
-              feature: "windows-icu,rust_icu_ubrk",
+              feature: windows-icu,rust_icu_ubrk,
             }
           - {
               target: aarch64-pc-windows-msvc,
@@ -73,7 +73,7 @@ jobs:
               target: aarch64-pc-windows-msvc,
               os: windows-11-arm,
               bname: ewt.dll,
-              feature: "windows-icu,rust_icu_ubrk",
+              feature: windows-icu,rust_icu_ubrk,
             }
           - {
               target: x86_64-pc-windows-gnullvm,

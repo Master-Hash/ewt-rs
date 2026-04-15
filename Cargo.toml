@@ -33,7 +33,7 @@ default = ["icu_segmenter"]
 # default = ["windows"]
 icu_segmenter = ["dep:icu_segmenter", "dep:itertools"]
 rust_icu_ubrk = ["dep:itertools", "dep:rust_icu_sys", "dep:rust_icu_ubrk"]
-windows-icu = ["rust_icu_sys/windows-sys", "dep:rust_icu_ubrk"]
+windows-icu = ["rust_icu_sys/windows-sys", "dep:rust_icu_ubrk", "dep:itertools"]
 
 [patch.crates-io]
 rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "9a8ca86" }
