@@ -7,7 +7,8 @@ fn main() {
     let features = [
         std::env::var("CARGO_FEATURE_ICU_SEGMENTER").is_ok(),
         std::env::var("CARGO_FEATURE_WINDOWS").is_ok(),
-        std::env::var("CARGO_FEATURE_RUST_ICU_UBRK").is_ok(),
+        std::env::var("CARGO_FEATURE_RUST_ICU_UBRK").is_ok()
+            || std::env::var("CARGO_FEATURE_WINDOWS_ICU").is_ok(),
     ];
 
     let enabled_count = features.iter().filter(|&&x| x).count();
@@ -16,7 +17,7 @@ fn main() {
         panic!(
             "Error: Features 'icu_segmenter', 'windows', and 'rust_icu_ubrk' are mutually exclusive. Choose only one.\n"
         );
-    } else if enabled_count == 0 && std::env::var("CARGO_FEATURE_WINDOWS_ICU").is_err() {
+    } else if enabled_count == 0 {
         panic!("Error: At least one feature must be enabled.");
     }
 
