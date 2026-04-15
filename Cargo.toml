@@ -16,12 +16,6 @@ windows = { version = "0.62.2", features = [
 ], optional = true }
 itertools = { version = "0.14.0", optional = true }
 libc_alloc = "1.0.7"
-
-[target.'cfg(target_env = "msvc")'.dependencies]
-rust_icu_sys = { version = "5.6.0", optional = true, default-features = false }
-rust_icu_ubrk = { version = "5.6.0", optional = true, default-features = false }
-
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
 rust_icu_sys = { version = "5.6.0", optional = true }
 rust_icu_ubrk = { version = "5.6.0", optional = true }
 
@@ -38,7 +32,12 @@ panic = "abort"
 default = ["icu_segmenter"]
 # default = ["windows"]
 icu_segmenter = ["dep:icu_segmenter", "dep:itertools"]
-rust_icu_ubrk = ["dep:rust_icu_ubrk", "dep:rust_icu_sys", "dep:itertools"]
+rust_icu_ubrk = ["dep:itertools", "dep:rust_icu_sys", "dep:rust_icu_ubrk"]
+windows-icu = ["rust_icu_sys/windows-sys", "dep:rust_icu_ubrk"]
 
 [patch.crates-io]
-rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "416f773" }
+rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "9a8ca86" }
+rust_icu_ubrk = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "9a8ca86" }
+# rust_icu_sys = { path = "../rust_icu/rust_icu_sys" }
+# rust_icu_ubrk = { path = "../rust_icu/rust_icu_ubrk" }
+

@@ -9,7 +9,9 @@ use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
 #[cfg(any(feature = "icu_segmenter", feature = "rust_icu_ubrk"))]
 use itertools::Itertools;
 use libc_alloc::LibcAlloc;
-#[cfg(feature = "rust_icu_ubrk")]
+#[cfg(all(feature = "rust_icu_ubrk", feature = "windows-icu"))]
+use rust_icu_sys::UBRK_WORD;
+#[cfg(all(feature = "rust_icu_ubrk", not(feature = "windows-icu")))]
 use rust_icu_sys::UBreakIteratorType::UBRK_WORD;
 #[cfg(feature = "rust_icu_ubrk")]
 use rust_icu_ubrk::UBreakIterator;
