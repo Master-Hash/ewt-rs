@@ -10,19 +10,19 @@ crate-type = ["cdylib"]
 [dependencies]
 icu_segmenter = { version = "2.2.0", optional = true }
 libc = "0.2.184"
-rust_icu_sys = { version = "5.6.0", optional = true }
 windows = { version = "0.62.2", features = [
     "Data_Text",
     "Foundation_Collections",
 ], optional = true }
 itertools = { version = "0.14.0", optional = true }
 libc_alloc = "1.0.7"
+rust_icu_ubrk = { version = "5.6.0", optional = true }
 
 [target.'cfg(target_env = "msvc")'.dependencies]
-rust_icu_ubrk = { version = "5.6.0", optional = true, default-features = false }
+rust_icu_sys = { version = "5.6.0", optional = true, default-features = false }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-rust_icu_ubrk = { version = "5.6.0", optional = true }
+rust_icu_sys = { version = "5.6.0", optional = true }
 
 [build-dependencies]
 bindgen = "0.72.1"
@@ -40,4 +40,4 @@ icu_segmenter = ["dep:icu_segmenter", "dep:itertools"]
 rust_icu_ubrk = ["dep:rust_icu_ubrk", "dep:rust_icu_sys", "dep:itertools"]
 
 [patch.crates-io]
-rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "a52eb0d" }
+rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "416f773" }
