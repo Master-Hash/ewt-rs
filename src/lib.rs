@@ -6,12 +6,18 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
 #[cfg(feature = "icu_segmenter")]
 use icu_segmenter::{WordSegmenter, options::WordBreakInvariantOptions};
-#[cfg(any(feature = "icu_segmenter", feature = "rust_icu_ubrk"))]
+#[cfg(any(
+    feature = "icu_segmenter",
+    feature = "rust_icu_ubrk",
+    feature = "windows-icu"
+))]
 use itertools::Itertools;
 use libc_alloc::LibcAlloc;
-#[cfg(feature = "rust_icu_ubrk")]
+#[cfg(feature = "windows-icu")]
+use rust_icu_sys::UBRK_WORD;
+#[cfg(all(feature = "rust_icu_ubrk", not(feature = "windows-icu")))]
 use rust_icu_sys::UBreakIteratorType::UBRK_WORD;
-#[cfg(feature = "rust_icu_ubrk")]
+#[cfg(any(feature = "rust_icu_ubrk", feature = "windows-icu"))]
 use rust_icu_ubrk::UBreakIterator;
 use std::ffi::CString;
 use std::os::raw;
@@ -35,7 +41,7 @@ static segmenter: LazyLock<SelectableWordsSegmenter> =
 static segmenter_icu: LazyLock<icu_segmenter::WordSegmenterBorrowed> =
     LazyLock::new(|| WordSegmenter::new_auto(WordBreakInvariantOptions::default()));
 
-#[cfg(feature = "rust_icu_ubrk")]
+#[cfg(any(feature = "rust_icu_ubrk", feature = "windows-icu"))]
 fn rust_icu_ubrk_word_boundaries(text: &str) -> Vec<usize> {
     let mut break_iter = UBreakIterator::try_new(UBRK_WORD, "zh", text).unwrap();
 
@@ -167,7 +173,7 @@ unsafe extern "C" fn Femt__do_split_helper(
                 });
             iConsCell.collect::<Vec<_>>()
         };
-        #[cfg(feature = "rust_icu_ubrk")]
+        #[cfg(any(feature = "rust_icu_ubrk", feature = "windows-icu"))]
         let mut consCell = {
             let segments = rust_icu_ubrk_word_boundaries(&param_u8)
                 .into_iter()
@@ -248,7 +254,7 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
                 }
             }
         };
-        #[cfg(feature = "rust_icu_ubrk")]
+        #[cfg(any(feature = "rust_icu_ubrk", feature = "windows-icu"))]
         let (l, r) = {
             let mut segments = rust_icu_ubrk_word_boundaries(&param_u8)
                 .into_iter()
