@@ -62,9 +62,9 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "2.11.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
+checksum = "c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3"
 
 [[package]]
 name = "cexpr"
@@ -455,7 +455,7 @@ dependencies = [
 [[package]]
 name = "rust_icu_release"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=a1a7ed0#a1a7ed08b9e26f18f428d546ca2ef2582c427b1a"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=a52eb0d#a52eb0db7607dd73ed8155497b311d73fa74fa1c"
 dependencies = [
  "anyhow",
 ]
@@ -463,14 +463,14 @@ dependencies = [
 [[package]]
 name = "rust_icu_sys"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=a1a7ed0#a1a7ed08b9e26f18f428d546ca2ef2582c427b1a"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=a52eb0d#a52eb0db7607dd73ed8155497b311d73fa74fa1c"
 dependencies = [
  "anyhow",
  "bindgen 0.69.5",
  "lazy_static",
  "libc",
  "paste",
- "rust_icu_release 5.6.0 (git+https://github.com/Master-Hash/rust_icu.git?rev=a1a7ed0)",
+ "rust_icu_release 5.6.0 (git+https://github.com/Master-Hash/rust_icu.git?rev=a52eb0d)",
 ]
 
 [[package]]

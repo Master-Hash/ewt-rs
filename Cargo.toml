@@ -17,6 +17,11 @@ windows = { version = "0.62.2", features = [
 ], optional = true }
 itertools = { version = "0.14.0", optional = true }
 libc_alloc = "1.0.7"
+
+[target.'cfg(target_env = "msvc")'.dependencies]
+rust_icu_ubrk = { version = "5.6.0", optional = true, default-features = false }
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
 rust_icu_ubrk = { version = "5.6.0", optional = true }
 
 [build-dependencies]
@@ -35,4 +40,4 @@ icu_segmenter = ["dep:icu_segmenter", "dep:itertools"]
 rust_icu_ubrk = ["dep:rust_icu_ubrk", "dep:rust_icu_sys", "dep:itertools"]
 
 [patch.crates-io]
-rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "a1a7ed0" }
+rust_icu_sys = { git = "https://github.com/Master-Hash/rust_icu.git", rev = "a52eb0d" }
