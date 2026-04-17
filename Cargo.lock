@@ -435,7 +435,7 @@ checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
 [[package]]
 name = "rust_icu_common"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=9a8ca86#9a8ca86efa8d23dd44c527553bb1454cca2b8a1d"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=09194c8#09194c801c07eb7dcc6b8e76778ae48dbb849c12"
 dependencies = [
  "anyhow",
  "rust_icu_sys",
@@ -445,7 +445,7 @@ dependencies = [
 [[package]]
 name = "rust_icu_release"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=9a8ca86#9a8ca86efa8d23dd44c527553bb1454cca2b8a1d"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=09194c8#09194c801c07eb7dcc6b8e76778ae48dbb849c12"
 dependencies = [
  "anyhow",
 ]
@@ -453,7 +453,7 @@ dependencies = [
 [[package]]
 name = "rust_icu_sys"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=9a8ca86#9a8ca86efa8d23dd44c527553bb1454cca2b8a1d"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=09194c8#09194c801c07eb7dcc6b8e76778ae48dbb849c12"
 dependencies = [
  "anyhow",
  "bindgen 0.69.5",
@@ -467,7 +467,7 @@ dependencies = [
 [[package]]
 name = "rust_icu_ubrk"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=9a8ca86#9a8ca86efa8d23dd44c527553bb1454cca2b8a1d"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=09194c8#09194c801c07eb7dcc6b8e76778ae48dbb849c12"
 dependencies = [
  "log",
  "paste",
@@ -479,7 +479,7 @@ dependencies = [
 [[package]]
 name = "rust_icu_ustring"
 version = "5.6.0"
-source = "git+https://github.com/Master-Hash/rust_icu.git?rev=9a8ca86#9a8ca86efa8d23dd44c527553bb1454cca2b8a1d"
+source = "git+https://github.com/Master-Hash/rust_icu.git?rev=09194c8#09194c801c07eb7dcc6b8e76778ae48dbb849c12"
 dependencies = [
  "log",
  "paste",
