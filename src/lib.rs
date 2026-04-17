@@ -26,9 +26,7 @@ use std::sync::LazyLock;
 #[cfg(feature = "windows")]
 use windows::Data::Text::SelectableWordsSegmenter;
 #[cfg(feature = "windows")]
-use windows::core::HSTRING;
-#[cfg(feature = "windows")]
-use windows::core::h;
+use windows::core::{HSTRING, h};
 
 #[global_allocator]
 static ALLOCATOR: LibcAlloc = LibcAlloc;
@@ -314,7 +312,7 @@ fn tokenize_with_icu_segmenter(text: &str) -> Vec<String> {
         .collect()
 }
 
-#[cfg(all(test, feature = "rust_icu_ubrk"))]
+#[cfg(all(test, any(feature = "rust_icu_ubrk", feature = "windows-icu")))]
 fn tokenize_with_rust_icu_ubrk(text: &str) -> Vec<String> {
     let boundaries = rust_icu_ubrk_word_boundaries(text);
     let chars: Vec<char> = text.chars().collect();
@@ -360,7 +358,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "rust_icu_ubrk")]
+    #[cfg(any(feature = "rust_icu_ubrk", feature = "windows-icu"))]
     #[test]
     fn idioms_are_not_all_single_chars_with_rust_icu_ubrk() {
         for idiom in IDIOMS {

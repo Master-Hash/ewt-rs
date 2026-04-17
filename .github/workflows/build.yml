@@ -142,6 +142,18 @@ jobs:
               feature: icu_segmenter,
             }
           - {
+              target: riscv64gc-unknown-linux-gnu,
+              os: ubuntu-24.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: riscv64gc-unknown-linux-gnu,
+              os: ubuntu-22.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: x86_64-linux-android,
               os: ubuntu-24.04,
               bname: libewt.so,
@@ -214,7 +226,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ matrix.job.feature }}-${{ matrix.job.os }}
+          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{
+            matrix.job.feature }}-${{ matrix.job.os }}
 
       - uses: taiki-e/install-action@v2
         with:
@@ -232,7 +245,15 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install crossbuild-essential-riscv64
-        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' }}
+        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
+          == 'icu_segmenter' }}
+
+      - run: |
+          sudo dpkg --add-architecture riscv64
+          sudo apt-get update
+          sudo apt-get install crossbuild-essential-riscv64 libicu-dev:riscv64
+        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
+          == 'rust_icu_ubrk' }}
 
       - uses: msys2/setup-msys2@v2
         id: msys2
@@ -242,7 +263,10 @@ jobs:
           release: ${{ matrix.job.os == 'windows-11-arm' }}
           update: true
           msystem: ${{ matrix.job.msystem }}
-          pacboy: clang:p pkgconf:p ${{ matrix.job.os == 'windows-2025' && matrix.job.target == 'aarch64-pc-windows-gnullvm' && 'clang:c pkgconf:c' || '' }} ${{ matrix.job.feature == 'rust_icu_ubrk' && 'icu:p' || '' }}
+          pacboy: clang:p pkgconf:p ${{ matrix.job.os == 'windows-2025' &&
+            matrix.job.target == 'aarch64-pc-windows-gnullvm' && 'clang:c
+            pkgconf:c' || '' }} ${{ matrix.job.feature == 'rust_icu_ubrk' &&
+            'icu:p' || '' }}
 
       - run: |
           echo "${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
@@ -270,20 +294,35 @@ jobs:
 
       - name: Build
         env:
-          BINDGEN_EXTRA_CLANG_ARGS_X86_64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clang64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\include" --target=x86_64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clang64
-          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\clang.exe
+          BINDGEN_EXTRA_CLANG_ARGS_X86_64_PC_WINDOWS_GNULLVM: -I"${{
+            steps.msys2.outputs.msys2-location }}\clang64\include" -I"${{
+            steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\include"
+            --target=x86_64-w64-windows-gnu --sysroot=${{
+            steps.msys2.outputs.msys2-location }}\clang64
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{
+            steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem
+            }}\bin\clang.exe
           CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld
-          BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\22\include" --target=aarch64-w64-windows-gnu --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
-          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{ steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem }}\bin\clang.exe
-          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
-          CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc-13
+          BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{
+            steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{
+            steps.msys2.outputs.msys2-location
+            }}\clangarm64\lib\clang\22\include" --target=aarch64-w64-windows-gnu
+            --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{
+            steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem
+            }}\bin\clang.exe
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C
+            link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{
+            steps.msys2.outputs.msys2-location }}\clangarm64
+          CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
           # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
           # CARGO_TARGET_X86_64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           # CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
           # BINDGEN_EXTRA_CLANG_ARGS_AARCH64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=aarch64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
           # CARGO_TARGET_AARCH64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           # CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
-        run: cargo build --locked --release --target=${{ matrix.job.target }} --no-default-features -F ${{ matrix.job.feature }}
+        run: cargo build --locked --release --target=${{ matrix.job.target }}
+          --no-default-features -F ${{ matrix.job.feature }}
         if: ${{ !endsWith(matrix.job.target, 'android') }}
 
       - name: Build Android
@@ -294,7 +333,8 @@ jobs:
       - name: "Artifact upload"
         uses: actions/upload-artifact@master
         with:
-          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{ startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' || '' }}
+          name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{
+            startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' || '' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 
