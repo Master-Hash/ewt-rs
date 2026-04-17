@@ -8,41 +8,53 @@ This crate provides dynamic module which [emt.el](https://github.com/roife/emt) 
 
 ### Pre-built
 
-Download from [Releases](https://github.com/Master-Hash/ewt-rs/releases), or [CI Artifact](https://github.com/Master-Hash/ewt-rs/actions/workflows/build.yml) for unversioned binaries.
+| Architecture \ OS | Windows                                                                                                                                                                                                                                  | GNU / Linux                                                                                                                                                                                                                                                                                                                                                                                  | MacOS                                                                                                                        |
+|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| x86_64            | [WinRT](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-windows-x86_64-pc-windows-msvc.zip), [ICU](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-windows-icu-x86_64-pc-windows-msvc.zip)   | ICU ([70](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-rust_icu_ubrk-x86_64-unknown-linux-gnu-70.zip), [74](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-rust_icu_ubrk-x86_64-unknown-linux-gnu.zip), [static](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-icu_segmenter-x86_64-unknown-linux-gnu.zip))          | ICU ([static](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-icu_segmenter-x86_64-apple-darwin.zip )) |
+| AArch64           | [WinRT](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-windows-aarch64-pc-windows-msvc.zip), [ICU](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-windows-icu-aarch64-pc-windows-msvc.zip) | ICU ([70](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-rust_icu_ubrk-aarch64-unknown-linux-gnu-70.zip), [74](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-rust_icu_ubrk-aarch64-unknown-linux-gnu.zip), [static](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-icu_segmenter-aarch64-unknown-linux-gnu.zip))       | ICU ([static](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-icu_segmenter-aarch64-apple-darwin.zip)) |
+| RISC-V 64         |                                                                                                                                                                                                                                          | ICU ([70](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-rust_icu_ubrk-riscv64gc-unknown-linux-gnu-70.zip), [74](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-rust_icu_ubrk-riscv64gc-unknown-linux-gnu.zip), [static](https://github.com/Master-Hash/ewt-rs/releases/latest/download/libewt-icu_segmenter-riscv64gc-unknown-linux-gnu.zip)) |                                                                                                                              |
+
+<a href="https://repology.org/project/icu/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/icu.svg?header=ICU%20Packaging%20status" alt="Packaging status" align="right">
+</a>
+
+Note:
+
+* For Linux user, check the ICU version on your system first. A quick reference is on the table to the right. If I didn't pre-build for your system, please use static version, or build it yourself.
+* Not all feature combination is listed above, but most of the users would be content about them. Find all from [CI Artifact](https://github.com/Master-Hash/ewt-rs/actions/workflows/build.yml).
+* Find MacOS module with Foundation backend from [emt](https://github.com/roife/emt/releases)
 
 <!-- Please ignore the binary from Releases page. -->
 
-I offer `.dll` files for msvc/gnu/gnullvm target, which are all ABI compatible, so mixture with either UCRT or CLANG64 Emacs is all right. You may need to build yourself, if you use Emacs built with MSVCRT.
-
-If you use gnullvm target binary, it links against `libunwind.dll`, so make sure it's included in PATH. It won't work if it's only included in `load-path` or same directory of the module dll.
-
-If you use binary built with `rust_icu_ubrk` feature, it's only compatible with ICU of specific version. If you're not Ubuntu user, compile yourself instead.
-
 ### Manually build
 
-1. Install Rust toolchain
-2. (On Windows) Install MSYS2, and put `${MSYSTEM}/bin` to PATH to make libclang work
-3. `cargo build --release` to use ICU via `icu_segmenter`
-4. `cargo build --release --no-default-features -F rust_icu_ubrk` to use ICU via `rust_icu_ubrk`
-5. `cargo build --release --no-default-features -F windows` to use WinRT API
+* `cargo build --release --no-default-features -F icu_segmenter`: ICU4X (static)
+* `cargo build --release --no-default-features -F rust_icu_ubrk`: ICU4C (system / MSYS2 on Windows)
+* `cargo build --release --no-default-features -F windows`: WinRT
+* `cargo build --release --no-default-features -F windows-icu` ICU4C (system)
 
-It's possible to build for `*-pc-windows-gnullvm`, but manual adjustment of `-I` include directory, libclang target, link target and link sysroot (when cross compiling) is required. You may refer to the [CI script](https://github.com/Master-Hash/ewt-rs/blob/main/.github/workflows/build.yml).
+For build dependencies and environment, you may refer to the [CI script](https://github.com/Master-Hash/ewt-rs/blob/main/.github/workflows/build.yml).
 
-## Adjustment
+## Hardcoded
 
 The segmenter language with WinRT API is hardcoded. Users can adjust `zh-CN` to the favoured language.
 
-## C vs C++ vs Rust
+<!-- ## C vs C++ vs Rust
 
 Microsoft doesn't and will never provide WinRT API for C.
 
 C++ 20 is required for cppwinrt. I encounter auto type deduction error in the cppwinrt header file, which I cannot fix. The size could be much smaller (~100k?) though, if it works, it's favourable.
 
-I have to use unsafe extern "C" all the way to write Rust binding. The safety no better than C++, but it has better WinRT API support and type inference. When built with lto, the size ~260K is acceptable.
+I have to use unsafe extern "C" all the way to write Rust binding. The safety no better than C++, but it has better WinRT API support and type inference. When built with lto, the size ~260K is acceptable. -->
 
 ## WinRT API vs ICU
 
-Personally I recommend WinRT API for Simplified Chinese and ICU for Traditional Chinese.
+WinRT is best for Simplified Chinese users, and ICU is best for Traditional Chinese users.
+
+Testing command:
+
+* `cargo test --no-default-features -F windows --lib -- --nocapture`
+* `cargo test --no-default-features -F windows-icu --lib -- --nocapture`
 
 | WinRT API           | ICU                   |
 |---------------------|-----------------------|
@@ -50,9 +62,9 @@ Personally I recommend WinRT API for Simplified Chinese and ICU for Traditional 
 | '有\|異\|曲\|同工\|之\|妙' | '有\|異曲同工\|之\|妙'       |
 | '丧心病狂\|的\|异想天开'     | '丧心病狂\|的\|异\|想\|天\|开' |
 
-## Note on UTF-8 Grapheme Cluster
+<!-- ## Note on UTF-8 Grapheme Cluster
 
-This crate handles String on char level instead of grapheme cluster level. However, this causes no problem, probably because emt.el only use the helper function when moving in CJK characters.
+This crate handles String on char level instead of grapheme cluster level. However, this causes no problem, probably because emt.el only use the helper function when moving in CJK characters. -->
 
 ## Future Work
 

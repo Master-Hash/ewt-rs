@@ -334,7 +334,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{
-            startsWith(matrix.job.os, 'ubuntu-22') && '-ubuntu-22.04' || '' }}
+            startsWith(matrix.job.os, 'ubuntu-22') && '-70' || '' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 
@@ -362,6 +362,6 @@ jobs:
 
       - name: Upload release
         run: |
-          gh release create "${GITHUB_REF##*/}" download/*.zip -t "${GITHUB_REF##*/}" --generate-notes
+          gh release create "${GITHUB_REF##*/}" download/*.zip -t "${GITHUB_REF##*/}" --generate-notes --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
