@@ -161,13 +161,13 @@ jobs:
             }
           - {
               target: x86_64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: icu_segmenter,
             }
           - {
               target: aarch64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: icu_segmenter,
             }
@@ -209,13 +209,13 @@ jobs:
             }
           - {
               target: x86_64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: rust_icu_ubrk,
             }
           - {
               target: aarch64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: rust_icu_ubrk,
             }
