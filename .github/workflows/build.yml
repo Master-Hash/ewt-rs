@@ -21,19 +21,19 @@ jobs:
         job:
           - {
               target: x86_64-pc-windows-gnu,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: icu_segmenter,
             }
           - {
               target: x86_64-pc-windows-gnu,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: windows,
             }
           - {
               target: x86_64-pc-windows-gnu,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: rust_icu_ubrk,
               msystem: ucrt64,
@@ -77,7 +77,7 @@ jobs:
             }
           - {
               target: x86_64-pc-windows-gnullvm,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clang64,
@@ -85,7 +85,7 @@ jobs:
             }
           - {
               target: x86_64-pc-windows-gnullvm,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: windows,
               msystem: clang64,
@@ -93,7 +93,7 @@ jobs:
             }
           - {
               target: x86_64-pc-windows-gnullvm,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: rust_icu_ubrk,
               msystem: clang64,
@@ -101,7 +101,7 @@ jobs:
             }
           - {
               target: aarch64-pc-windows-gnullvm,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: icu_segmenter,
               msystem: clangarm64,
@@ -109,7 +109,7 @@ jobs:
             }
           - {
               target: aarch64-pc-windows-gnullvm,
-              os: windows-2025,
+              os: windows-2025-vs2026,
               bname: ewt.dll,
               feature: windows,
               msystem: clangarm64,
@@ -149,19 +149,25 @@ jobs:
             }
           - {
               target: riscv64gc-unknown-linux-gnu,
+              os: ubuntu-26.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: riscv64gc-unknown-linux-gnu,
               os: ubuntu-22.04-arm,
               bname: libewt.so,
               feature: rust_icu_ubrk,
             }
           - {
               target: x86_64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: icu_segmenter,
             }
           - {
               target: aarch64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: icu_segmenter,
             }
@@ -190,14 +196,26 @@ jobs:
               feature: rust_icu_ubrk,
             }
           - {
+              target: x86_64-unknown-linux-gnu,
+              os: ubuntu-26.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-26.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: x86_64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: rust_icu_ubrk,
             }
           - {
               target: aarch64-linux-android,
-              os: ubuntu-24.04,
+              os: ubuntu-latest,
               bname: libewt.so,
               feature: rust_icu_ubrk,
             }
@@ -226,7 +244,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{
+          key:
+            ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{
             matrix.job.feature }}-${{ matrix.job.os }}
 
       - uses: taiki-e/install-action@v2
@@ -245,15 +264,22 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install crossbuild-essential-riscv64
-        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
+        if:
+          ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
           == 'icu_segmenter' }}
 
       - run: |
           sudo dpkg --add-architecture riscv64
           sudo apt-get update
           sudo apt-get install crossbuild-essential-riscv64 libicu-dev:riscv64
-        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
+        if:
+          ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
           == 'rust_icu_ubrk' }}
+
+      - run: |
+          sudo apt-get update
+          sudo apt-get install libicu-dev
+        if: ${{ startsWith(matrix.job.os, 'ubuntu-26') }}
 
       - uses: msys2/setup-msys2@v2
         id: msys2
@@ -263,7 +289,8 @@ jobs:
           release: ${{ matrix.job.os == 'windows-11-arm' }}
           update: true
           msystem: ${{ matrix.job.msystem }}
-          pacboy: clang:p pkgconf:p ${{ matrix.job.os == 'windows-2025' &&
+          pacboy:
+            clang:p pkgconf:p ${{ matrix.job.os == 'windows-2025-vs2026' &&
             matrix.job.target == 'aarch64-pc-windows-gnullvm' && 'clang:c
             pkgconf:c' || '' }} ${{ matrix.job.feature == 'rust_icu_ubrk' &&
             'icu:p' || '' }}
@@ -290,7 +317,7 @@ jobs:
       - run: |
           mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\lib\aarch64-w64-windows-gnu
           cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\22\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\lib\aarch64-w64-windows-gnu\libclang_rt.builtins.a
-        if: ${{ matrix.job.msystem == 'clangarm64' && matrix.job.os == 'windows-2025' }}
+        if: ${{ matrix.job.msystem == 'clangarm64' && matrix.job.os == 'windows-2025-vs2026' }}
 
       - name: Build
         env:
@@ -311,7 +338,8 @@ jobs:
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{
             steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem
             }}\bin\clang.exe
-          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS:
+            -C link-arg=-fuse-ld=lld -C
             link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{
             steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
@@ -334,7 +362,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{
-            startsWith(matrix.job.os, 'ubuntu-22') && '-70' || '' }}
+            startsWith(matrix.job.os, 'ubuntu-22') && '-70' || startsWith(matrix.job.os, 'ubuntu-24') && '-74' || '' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 
