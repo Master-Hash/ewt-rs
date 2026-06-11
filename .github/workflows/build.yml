@@ -149,6 +149,12 @@ jobs:
             }
           - {
               target: riscv64gc-unknown-linux-gnu,
+              os: ubuntu-26.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: riscv64gc-unknown-linux-gnu,
               os: ubuntu-22.04-arm,
               bname: libewt.so,
               feature: rust_icu_ubrk,
@@ -190,6 +196,18 @@ jobs:
               feature: rust_icu_ubrk,
             }
           - {
+              target: x86_64-unknown-linux-gnu,
+              os: ubuntu-26.04,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: aarch64-unknown-linux-gnu,
+              os: ubuntu-26.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
               target: x86_64-linux-android,
               os: ubuntu-24.04,
               bname: libewt.so,
@@ -226,7 +244,8 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{
+          key:
+            ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{
             matrix.job.feature }}-${{ matrix.job.os }}
 
       - uses: taiki-e/install-action@v2
@@ -245,14 +264,16 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install crossbuild-essential-riscv64
-        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
+        if:
+          ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
           == 'icu_segmenter' }}
 
       - run: |
           sudo dpkg --add-architecture riscv64
           sudo apt-get update
           sudo apt-get install crossbuild-essential-riscv64 libicu-dev:riscv64
-        if: ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
+        if:
+          ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
           == 'rust_icu_ubrk' }}
 
       - uses: msys2/setup-msys2@v2
@@ -311,7 +332,8 @@ jobs:
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{
             steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem
             }}\bin\clang.exe
-          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS: -C link-arg=-fuse-ld=lld -C
+          CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_RUSTFLAGS:
+            -C link-arg=-fuse-ld=lld -C
             link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{
             steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
@@ -334,7 +356,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: libewt-${{ matrix.job.feature }}-${{ matrix.job.target }}${{
-            startsWith(matrix.job.os, 'ubuntu-22') && '-70' || '' }}
+            startsWith(matrix.job.os, 'ubuntu-22') && '-70' || startsWith(matrix.job.os, 'ubuntu-24') && '-74' || '' }}
           path: |
             target/${{ matrix.job.target }}/release/${{ matrix.job.bname }}
 
