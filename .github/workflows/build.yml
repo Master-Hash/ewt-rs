@@ -343,7 +343,7 @@ jobs:
           # BINDGEN_EXTRA_CLANG_ARGS_AARCH64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=aarch64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
           # CARGO_TARGET_AARCH64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           # CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
-        run: cargo build --locked --release --target=${{ matrix.job.target }}
+        run: cargo build --locked --target=${{ matrix.job.target }}
           --no-default-features -F ${{ matrix.job.feature }}
         if: ${{ !endsWith(matrix.job.target, 'android') }}
 
