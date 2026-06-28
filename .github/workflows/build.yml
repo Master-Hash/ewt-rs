@@ -41,37 +41,37 @@ jobs:
             }
           - {
               target: x86_64-pc-windows-msvc,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: icu_segmenter,
             }
           - {
               target: x86_64-pc-windows-msvc,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: windows,
             }
           - {
               target: x86_64-pc-windows-msvc,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: windows-icu,
             }
           - {
               target: aarch64-pc-windows-msvc,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: icu_segmenter,
             }
           - {
               target: aarch64-pc-windows-msvc,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: windows,
             }
           - {
               target: aarch64-pc-windows-msvc,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: windows-icu,
             }
@@ -117,7 +117,7 @@ jobs:
             }
           - {
               target: aarch64-pc-windows-gnullvm,
-              os: windows-11-arm,
+              os: windows-11-vs2026-arm,
               bname: ewt.dll,
               feature: rust_icu_ubrk,
               msystem: clangarm64,
@@ -148,8 +148,14 @@ jobs:
               feature: rust_icu_ubrk,
             }
           - {
-              target: riscv64gc-unknown-linux-gnu,
+              target: riscv64a23-unknown-linux-gnu,
               os: ubuntu-26.04-arm,
+              bname: libewt.so,
+              feature: rust_icu_ubrk,
+            }
+          - {
+              target: riscv64a23-unknown-linux-gnu,
+              os: ubuntu-26.04, # TEMP
               bname: libewt.so,
               feature: rust_icu_ubrk,
             }
@@ -272,21 +278,14 @@ jobs:
           sudo dpkg --add-architecture riscv64
           sudo apt-get update
           sudo apt-get install crossbuild-essential-riscv64 libicu-dev:riscv64
-        if:
-          ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
-          == 'rust_icu_ubrk' }}
-
-      - run: |
-          sudo apt-get update
-          sudo apt-get install libicu-dev
-        if: ${{ startsWith(matrix.job.os, 'ubuntu-26') }}
+        if: (matrix.job.target == 'riscv64gc-unknown-linux-gnu' || matrix.job.target == 'riscv64a23-unknown-linux-gnu') && matrix.job.feature == 'rust_icu_ubrk'
 
       - uses: msys2/setup-msys2@v2
         id: msys2
         # Run only when having msystem variable
         if: ${{ matrix.job.msystem != '' }}
         with:
-          release: ${{ matrix.job.os == 'windows-11-arm' }}
+          release: ${{ matrix.job.os == 'windows-11-vs2026-arm' }}
           update: true
           msystem: ${{ matrix.job.msystem }}
           pacboy:
