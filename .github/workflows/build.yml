@@ -274,28 +274,28 @@ jobs:
           Types: deb
           URIs: mirror+file:/etc/apt/apt-mirrors.txt
           Suites: resolute resolute-updates resolute-backports
-          Components: main universe restricted multiverse
+          Components: main universe
           Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
           Architectures: arm64
 
           Types: deb
           URIs: mirror+file:/etc/apt/apt-mirrors.txt
           Suites: resolute-security
-          Components: main universe restricted multiverse
+          Components: main universe
           Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
           Architectures: arm64
 
           Types: deb
           URIs: http://ports.ubuntu.com/ubuntu-ports/
           Suites: resolute resolute-updates resolute-backports
-          Components: main restricted universe multiverse
+          Components: main
           Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
           Architectures: riscv64
 
           Types: deb
           URIs: http://security.ports.ubuntu.com/ubuntu-ports/
           Suites: resolute-security
-          Components: main restricted universe multiverse
+          Components: main
           Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
           Architectures: riscv64
           EOF
@@ -368,6 +368,8 @@ jobs:
             link-arg=--target=aarch64-w64-windows-gnu -C link-arg=--sysroot=${{
             steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
+          CARGO_TARGET_RISCV64A23_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
+          BINDGEN_EXTRA_CLANG_ARGS_RISCV64A23_UNKNOWN_LINUX_GNU: --target=riscv64gc-unknown-linux-gnu
           # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
           # CARGO_TARGET_X86_64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           # CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
