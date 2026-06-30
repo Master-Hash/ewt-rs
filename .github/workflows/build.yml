@@ -154,12 +154,6 @@ jobs:
               feature: rust_icu_ubrk,
             }
           - {
-              target: riscv64a23-unknown-linux-gnu,
-              os: ubuntu-26.04, # TEMP
-              bname: libewt.so,
-              feature: rust_icu_ubrk,
-            }
-          - {
               target: riscv64gc-unknown-linux-gnu,
               os: ubuntu-22.04-arm,
               bname: libewt.so,
@@ -274,6 +268,38 @@ jobs:
           ${{ matrix.job.target == 'riscv64gc-unknown-linux-gnu' && matrix.job.feature
           == 'icu_segmenter' }}
 
+      # https://github.com/actions/runner-images/issues/14297#issuecomment-4842918386
+      - run: |
+          cat << 'EOF' | sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null
+          Types: deb
+          URIs: mirror+file:/etc/apt/apt-mirrors.txt
+          Suites: resolute resolute-updates resolute-backports
+          Components: main universe restricted multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          Architectures: arm64
+
+          Types: deb
+          URIs: mirror+file:/etc/apt/apt-mirrors.txt
+          Suites: resolute-security
+          Components: main universe restricted multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          Architectures: arm64
+
+          Types: deb
+          URIs: http://ports.ubuntu.com/ubuntu-ports/
+          Suites: resolute resolute-updates resolute-backports
+          Components: main restricted universe multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          Architectures: riscv64
+
+          Types: deb
+          URIs: http://security.ports.ubuntu.com/ubuntu-ports/
+          Suites: resolute-security
+          Components: main restricted universe multiverse
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          Architectures: riscv64
+          EOF
+        if: matrix.job.target == 'riscv64a23-unknown-linux-gnu' && matrix.job.feature == 'rust_icu_ubrk'
       - run: |
           sudo dpkg --add-architecture riscv64
           sudo apt-get update
