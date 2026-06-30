@@ -369,7 +369,6 @@ jobs:
             steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_RISCV64GC_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
           CARGO_TARGET_RISCV64A23_UNKNOWN_LINUX_GNU_LINKER: riscv64-linux-gnu-gcc
-          BINDGEN_EXTRA_CLANG_ARGS_RISCV64A23_UNKNOWN_LINUX_GNU: --target=riscv64gc-unknown-linux-gnu
           # BINDGEN_EXTRA_CLANG_ARGS_X86_64_LINUX_ANDROID: -I"${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include" --target=x86_64-linux-android22 --sysroot=${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/sysroot
           # CARGO_TARGET_X86_64_LINUX_ANDROID_AR: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
           # CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER: ${{ env.ANDROID_NDK_LATEST_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang
