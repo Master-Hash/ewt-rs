@@ -106,8 +106,15 @@ dependencies = [
  "libc_alloc",
  "rust_icu_sys",
  "rust_icu_ubrk",
+ "ucrtbase",
  "windows",
 ]
+
+[[package]]
+name = "find-msvc-tools"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "glob"
@@ -517,6 +524,15 @@ dependencies = [
  "displaydoc",
  "serde_core",
  "zerovec",
+]
+
+[[package]]
+name = "ucrtbase"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f42efc675d365ee861a397f90fa160a8ae9f89cece77fa55e1bf0bb297eeeb30"
+dependencies = [
+ "find-msvc-tools",
 ]
 
 [[package]]
