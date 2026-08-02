@@ -239,12 +239,12 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
                 if n < r.try_into().unwrap() {
                     Err((l, r))
                 } else {
-                    Ok(r)
+                    std::hint::unreachable_unchecked()
                 }
             });
             match iConsCell {
                 // Seems all the program will be panic if we reach here
-                Ok(_) => unreachable!(),
+                Ok(_) => std::hint::unreachable_unchecked(),
                 Err((l, r)) => {
                     let l = make_integer(env, l as i64);
                     let r = make_integer(env, r as i64);
@@ -261,11 +261,11 @@ unsafe extern "C" fn Femt__word_at_point_or_forward(
                 if n < r.try_into().unwrap() {
                     Err((l, r))
                 } else {
-                    Ok(r)
+                    std::hint::unreachable_unchecked()
                 }
             });
             match iConsCell {
-                Ok(_) => unreachable!(),
+                Ok(_) => std::hint::unreachable_unchecked(),
                 Err((l, r)) => {
                     let l = make_integer(env, l as i64);
                     let r = make_integer(env, r as i64);
