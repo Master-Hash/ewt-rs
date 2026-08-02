@@ -100,7 +100,7 @@ pub unsafe extern "C" fn emacs_module_init(runtime: *mut emacs_runtime) -> libc:
             2,
             [Qsplit_helper, func_emt__do_split_helper].as_mut_ptr(),
         );
-        let func_emt__do_split_helper = make_function(
+        let func_emt__word_at_point_or_forward = make_function(
             env,
             2,
             2,
@@ -112,7 +112,7 @@ pub unsafe extern "C" fn emacs_module_init(runtime: *mut emacs_runtime) -> libc:
             env,
             Qfset,
             2,
-            [Qword_at_point, func_emt__do_split_helper].as_mut_ptr(),
+            [Qword_at_point, func_emt__word_at_point_or_forward].as_mut_ptr(),
         );
         0
     }

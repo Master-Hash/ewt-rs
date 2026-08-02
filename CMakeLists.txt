@@ -4,7 +4,6 @@ set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
     "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 
 project(ewt LANGUAGES CXX)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -12,7 +11,9 @@ add_library(ewt SHARED src/lib.cc)
 target_sources(ewt PRIVATE src/lib.def)
 
 if(MSVC)
-    target_compile_options(ewt PRIVATE /GR- /EHs-c- /guard:cf)
+    target_compile_options(ewt PRIVATE /W4)
+    target_compile_options(ewt PRIVATE /GR- /EHs-c-)
+    target_compile_options(ewt PRIVATE /guard:cf)
     target_link_options(ewt PRIVATE /guard:cf)
 else()
     target_compile_options(ewt PRIVATE -Wall -Wextra)
