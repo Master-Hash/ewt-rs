@@ -22,3 +22,4 @@ target/
 
 *~
 src/main.rs
+build/

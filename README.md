@@ -66,12 +66,29 @@ Testing command:
 
 This crate handles String on char level instead of grapheme cluster level. However, this causes no problem, probably because emt.el only use the helper function when moving in CJK characters. -->
 
+## C++
+
+This project has an experimental rewrite in C++. Currently:
+
+* binary size: 80k, slightly smaller than Rust (104k)
+* No prebuilt binary
+* Only Windows
+* Only WinRT backend
+
+Compile with:
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build .\build\
+```
+
 ## Future Work
 
 - [x] Try ICU Backend
 - [x] Find out why M-S-{F,B} doesn't select anything
 - [x] Link against system icu
 - [ ] Stop linking against libunwind.dll
+- [ ] Test C++ Module
 
 ## Credit
 
