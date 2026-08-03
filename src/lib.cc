@@ -1,14 +1,21 @@
+#if 0 && defined(_MSC_VER)
+import std;
+import winrt.Windows.Data.Text;
+import winrt.Windows.Fundation.Collections;
+import winrt.Windows.Foundation;
+#else
 #include <winrt/Windows.Data.Text.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Foundation.h>
-// import std;
-// import winrt.Windows.Data.Text;
-// import winrt.Windows.Fundation.Collections;
-// import winrt.Windows.Foundation;
+#endif
 
 namespace emacs {
+#if __has_include(<emacs-module.h>)
 #include <emacs-module.h>
-}
+#else
+#include "../emacs-module.h"
+#endif
+} // namespace emacs
 
 using emacs::emacs_env, emacs::emacs_value, emacs::emacs_runtime;
 using namespace winrt;
@@ -87,7 +94,7 @@ auto Femt__word_at_point_or_forward(emacs_env *__restrict env, ptrdiff_t nargs,
 }
 } // namespace
 
-extern "C" int emacs_module_init(emacs_runtime *ert) noexcept {
+extern "C" int emacs_module_init(emacs_runtime *ert) {
   winrt::init_apartment(winrt::apartment_type::single_threaded);
 
   auto *env = ert->get_environment(ert);
