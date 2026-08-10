@@ -22,6 +22,7 @@ else()
     target_compile_options(ewt PRIVATE -mguard=cf)
     target_link_options(ewt PRIVATE -mguard=cf)
     target_link_libraries(ewt -lruntimeobject)
+    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -s")
 endif()
 
 # set_target_properties(ewt PROPERTIES CXX_MODULE_STD ON)
