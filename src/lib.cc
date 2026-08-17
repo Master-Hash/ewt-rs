@@ -1,12 +1,17 @@
-#if 0 && defined(_MSC_VER)
+#ifdef USE_WINRT
+#if 0
 import std;
 import winrt.Windows.Data.Text;
 import winrt.Windows.Fundation.Collections;
-import winrt.Windows.Foundation;
 #else
 #include <winrt/Windows.Data.Text.h>
 #include <winrt/Windows.Foundation.Collections.h>
-#include <winrt/Windows.Foundation.h>
+#endif
+#elifdef USE_ICU
+#define U_CHARSET_IS_UTF8 1
+#include <vector>
+#include <unicode/brkiter.h>
+#include <unicode/unistr.h>
 #endif
 
 namespace emacs {
@@ -18,15 +23,33 @@ namespace emacs {
 } // namespace emacs
 
 using emacs::emacs_env, emacs::emacs_value, emacs::emacs_runtime;
+
+#ifdef USE_WINRT
 using namespace winrt;
 using namespace Windows::Data::Text;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+#elifdef USE_ICU
+#endif
 
 namespace {
-static SelectableWordsSegmenter g_segmenter =
-    SelectableWordsSegmenter(L"zh-CN");
 
+#ifdef USE_WINRT
+auto g_segmenter =
+    SelectableWordsSegmenter(L"zh-CN");
+#elifdef USE_ICU
+auto status = U_ZERO_ERROR;
+auto bi = []() {
+  const auto t = icu::BreakIterator::createWordInstance(
+      icu::Locale::getSimplifiedChinese(), status);
+  if (U_FAILURE(status)) {
+    std::abort();
+  }
+  return t;
+}();
+#endif
+
+#ifdef USE_WINRT
 auto copy_string(emacs_env *__restrict env,
                  emacs_value __restrict arg) noexcept {
   ptrdiff_t len = 0;
@@ -39,76 +62,131 @@ auto copy_string(emacs_env *__restrict env,
     // throw std::runtime_error("copy_string_contents: failed to copy content");
     std::abort();
   }
-  // if (!buffer.empty() && buffer.back() == '\0') {
-  //     buffer.pop_back();
+  return buffer;
+}
+#elifdef USE_ICU
+auto copy_string(emacs_env *__restrict env,
+                 const emacs_value __restrict arg) noexcept -> std::u8string {
+  ptrdiff_t len = 0;
+  if (!env->copy_string_contents(env, arg, nullptr, &len)) {
+    std::abort();
+  }
+  std::u8string buffer(len, u8'\0');
+  if (!env->copy_string_contents(env, arg,
+                                 reinterpret_cast<char *>(&buffer[0]), &len)) {
+    std::abort();
+  }
+  // if (buffer.size() > static_cast<size_t>(len)) {
+  //   buffer.resize(len);
   // }
   return buffer;
 }
+#endif
 
-auto Femt__do_split_helper(emacs_env *__restrict env, ptrdiff_t nargs,
+auto Femt__do_split_helper(emacs_env *__restrict env, const ptrdiff_t nargs,
                            emacs_value *__restrict args,
                            void *__restrict data) noexcept {
   (void)nargs;
   (void)data;
-  auto text = copy_string(env, args[0]);
-  auto text_hstring = winrt::to_hstring(text);
-
-  auto tokens = g_segmenter.GetTokens(text_hstring);
+  const auto text = copy_string(env, args[0]);
   std::vector<emacs_value> conses;
-  auto count = tokens.Size();
+
+  auto pushlr = [&conses, env](auto start, auto end) {
+    const auto l = env->make_integer(env, start);
+    const auto r = env->make_integer(env, end);
+    emacs_value cons_args[2] = {l, r};
+    const auto cons = env->funcall(env, env->intern(env, "cons"), 2, cons_args);
+    conses.push_back(cons);
+  };
+#ifdef USE_WINRT
+  const auto text_hstring = winrt::to_hstring(text);
+  const auto tokens = g_segmenter.GetTokens(text_hstring);
+
+  const auto count = tokens.Size();
   for (uint32_t i = 0; i < count; ++i) {
     auto token = tokens.GetAt(i);
-    auto segment = token.SourceTextSegment();
-    int64_t start = segment.StartPosition;
-    int64_t end = segment.StartPosition + segment.Length;
+    const auto [StartPosition, Length] = token.SourceTextSegment();
+    const int64_t start = StartPosition;
+    const int64_t end = StartPosition + Length;
 
-    auto l = env->make_integer(env, start);
-    auto r = env->make_integer(env, end);
-    emacs_value cons_args[2] = {l, r};
-    auto cons = env->funcall(env, env->intern(env, "cons"), 2, cons_args);
-    conses.push_back(cons);
+    pushlr(start, end);
   }
+#elifdef USE_ICU
+  const auto text_icu = utext_openUTF8(nullptr,
+                                       reinterpret_cast<const char *>(text.
+                                         c_str()), text.length(),
+                                       &status);
+  bi->setText(text_icu, status);
+  auto start = bi->first();
+  for (auto end = bi->next(); end != icu::BreakIterator::DONE;
+       start = end, end = bi->next()) {
+    pushlr(start, end);
+  }
+#endif
 
   return env->funcall(env, env->intern(env, "vector"),
                       static_cast<ptrdiff_t>(conses.size()), conses.data());
 }
 
-auto Femt__word_at_point_or_forward(emacs_env *__restrict env, ptrdiff_t nargs,
+auto Femt__word_at_point_or_forward(emacs_env *__restrict env,
+                                    const ptrdiff_t nargs,
                                     emacs_value *__restrict args,
                                     void *__restrict data) noexcept {
   (void)nargs;
   (void)data;
-  auto text = copy_string(env, args[0]);
-  auto pos = env->extract_integer(env, args[1]);
-  auto text_hstring = winrt::to_hstring(text);
+  const auto text = copy_string(env, args[0]);
+  const auto pos = env->extract_integer(env, args[1]);
+#ifdef USE_WINRT
+  const auto text_hstring = winrt::to_hstring(text);
 
-  auto token = g_segmenter.GetTokenAt(text_hstring, static_cast<uint32_t>(pos));
-  auto segment = token.SourceTextSegment();
-  int64_t start = segment.StartPosition;
-  int64_t end = segment.StartPosition + segment.Length;
+  const auto token = g_segmenter.GetTokenAt(text_hstring,
+                                            static_cast<uint32_t>(pos));
+  const auto [StartPosition, Length] = token.SourceTextSegment();
+  const int64_t start = StartPosition;
+  const int64_t end = StartPosition + Length;
+#elifdef USE_ICU
 
-  auto l = env->make_integer(env, start);
-  auto r = env->make_integer(env, end);
+  const auto text_icu = utext_openUTF8(nullptr,
+                                       reinterpret_cast<const char *>(text.
+                                         c_str()), text.length(),
+                                       &status);
+  bi->setText(text_icu, status);
+  int64_t start, end;
+  if (bi->isBoundary(pos)) {
+    start = pos;
+    const auto e = bi->next();
+    end = e == icu::BreakIterator::DONE ? text.length() : e;
+  } else {
+    end = bi->current();
+    const auto s = bi->previous();
+    start = s == icu::BreakIterator::DONE ? 0 : s;
+  }
+#endif
+  const auto l = env->make_integer(env, start);
+  const auto r = env->make_integer(env, end);
   emacs_value cons_args[2] = {l, r};
   return env->funcall(env, env->intern(env, "cons"), 2, cons_args);
 }
 } // namespace
 
 extern "C" int emacs_module_init(emacs_runtime *ert) {
+#ifdef USE_WINRT
   winrt::init_apartment(winrt::apartment_type::single_threaded);
+#endif
 
   auto *env = ert->get_environment(ert);
 
   auto intern = [env](const char *name) { return env->intern(env, name); };
-  auto funcall = [env](emacs_value fn, int nargs, emacs_value args[]) {
+  auto funcall = [env](const emacs_value fn, const int nargs,
+                       emacs_value args[]) {
     return env->funcall(env, fn, nargs, args);
   };
 
-  auto Qfset = intern("fset");
-  auto Qsplit_helper = intern("emt--do-split-helper");
-  auto Qword_at_point = intern("emt--word-at-point-or-forward-helper");
+  const auto Qfset = intern("fset");
+  const auto Qsplit_helper = intern("emt--do-split-helper");
+  const auto Qword_at_point = intern("emt--word-at-point-or-forward-helper");
 
-  auto func_split = env->make_function(
+  const auto func_split = env->make_function(
       env, 1, 1, Femt__do_split_helper,
       "This function takes a string and return an array of bounds. "
       "A bound is a cons with the starting position and the ending position of "
@@ -117,7 +195,7 @@ extern "C" int emacs_module_init(emacs_runtime *ert) {
   emacs_value fset_args1[2] = {Qsplit_helper, func_split};
   funcall(Qfset, 2, fset_args1);
 
-  auto func_word =
+  const auto func_word =
       env->make_function(env, 2, 2, Femt__word_at_point_or_forward,
                          "This functions takes a string and a position, and "
                          "returns the bound of the word at the position. "
