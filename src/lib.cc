@@ -81,6 +81,41 @@ auto copy_string(emacs_env *__restrict env,
   // }
   return buffer;
 }
+
+struct ByteToCharConverter {
+  const std::u8string &text;
+  int64_t last_byte = 0;
+  int64_t last_char = 0;
+
+  explicit ByteToCharConverter(const std::u8string &t) : text(t) {
+  }
+
+  auto convert(int64_t byte_offset) noexcept -> int64_t {
+    const auto size = static_cast<int64_t>(text.size());
+    while (last_byte < byte_offset && last_byte < size) {
+      if ((static_cast<unsigned char>(text[last_byte]) & 0xC0) != 0x80) {
+        ++last_char;
+      }
+      ++last_byte;
+    }
+    return last_char;
+  }
+};
+
+auto char_to_byte_index(const std::u8string &text,
+                        const int64_t char_index) noexcept -> int64_t {
+  int64_t i = 0;
+  int64_t count = 0;
+  const auto size = static_cast<int64_t>(text.size());
+  while (i < size && count < char_index) {
+    ++i;
+    while (i < size && (static_cast<unsigned char>(text[i]) & 0xC0) == 0x80) {
+      ++i;
+    }
+    ++count;
+  }
+  return i;
+}
 #endif
 
 auto Femt__do_split_helper(emacs_env *__restrict env, const ptrdiff_t nargs,
@@ -117,10 +152,11 @@ auto Femt__do_split_helper(emacs_env *__restrict env, const ptrdiff_t nargs,
                                          c_str()), text.length(),
                                        &status);
   bi->setText(text_icu, status);
+  ByteToCharConverter conv(text);
   auto start = bi->first();
   for (auto end = bi->next(); end != icu::BreakIterator::DONE;
        start = end, end = bi->next()) {
-    pushlr(start, end);
+    pushlr(conv.convert(start), conv.convert(end));
   }
 #endif
 
@@ -145,22 +181,27 @@ auto Femt__word_at_point_or_forward(emacs_env *__restrict env,
   const int64_t start = StartPosition;
   const int64_t end = StartPosition + Length;
 #elifdef USE_ICU
-
   const auto text_icu = utext_openUTF8(nullptr,
                                        reinterpret_cast<const char *>(text.
                                          c_str()), text.length(),
                                        &status);
   bi->setText(text_icu, status);
+  const auto pos_byte = char_to_byte_index(text, pos);
   int64_t start, end;
-  if (bi->isBoundary(pos)) {
-    start = pos;
+  if (bi->isBoundary(pos_byte)) {
+    start = pos_byte;
     const auto e = bi->next();
-    end = e == icu::BreakIterator::DONE ? text.length() : e;
+    end = e == icu::BreakIterator::DONE
+            ? text.length()
+            : e;
   } else {
     end = bi->current();
     const auto s = bi->previous();
     start = s == icu::BreakIterator::DONE ? 0 : s;
   }
+  ByteToCharConverter conv(text);
+  start = conv.convert(start);
+  end = conv.convert(end);
 #endif
   const auto l = env->make_integer(env, start);
   const auto r = env->make_integer(env, end);
