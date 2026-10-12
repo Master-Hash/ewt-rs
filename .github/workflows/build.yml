@@ -248,7 +248,7 @@ jobs:
             ${{ matrix.job.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{
             matrix.job.feature }}-${{ matrix.job.os }}
 
-      - uses: taiki-e/install-action@v2.87.22
+      - uses: taiki-e/install-action@v2.87.26
         with:
           tool: cargo-ndk
         if: ${{ endsWith(matrix.job.target, 'android') }}
@@ -340,15 +340,15 @@ jobs:
       #   if: ${{ endsWith(matrix.job.target, 'android') }}
 
       - run: |
-          mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\lib\aarch64-w64-windows-gnu
-          cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\22\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\lib\aarch64-w64-windows-gnu\libclang_rt.builtins.a
+          mkdir ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\23\lib\aarch64-w64-windows-gnu
+          cp ${{ steps.msys2.outputs.msys2-location }}\clangarm64\lib\clang\23\lib\windows\libclang_rt.builtins-aarch64.a ${{ steps.msys2.outputs.msys2-location }}\clang64\lib\clang\23\lib\aarch64-w64-windows-gnu\libclang_rt.builtins.a
         if: ${{ matrix.job.msystem == 'clangarm64' && matrix.job.os == 'windows-2025-vs2026' }}
 
       - name: Build
         env:
           BINDGEN_EXTRA_CLANG_ARGS_X86_64_PC_WINDOWS_GNULLVM: -I"${{
             steps.msys2.outputs.msys2-location }}\clang64\include" -I"${{
-            steps.msys2.outputs.msys2-location }}\clang64\lib\clang\22\include"
+            steps.msys2.outputs.msys2-location }}\clang64\lib\clang\23\include"
             --target=x86_64-w64-windows-gnu --sysroot=${{
             steps.msys2.outputs.msys2-location }}\clang64
           CARGO_TARGET_X86_64_PC_WINDOWS_GNULLVM_LINKER: ${{
@@ -358,7 +358,7 @@ jobs:
           BINDGEN_EXTRA_CLANG_ARGS_AARCH64_PC_WINDOWS_GNULLVM: -I"${{
             steps.msys2.outputs.msys2-location }}\clangarm64\include" -I"${{
             steps.msys2.outputs.msys2-location
-            }}\clangarm64\lib\clang\22\include" --target=aarch64-w64-windows-gnu
+            }}\clangarm64\lib\clang\23\include" --target=aarch64-w64-windows-gnu
             --sysroot=${{ steps.msys2.outputs.msys2-location }}\clangarm64
           CARGO_TARGET_AARCH64_PC_WINDOWS_GNULLVM_LINKER: ${{
             steps.msys2.outputs.msys2-location }}\${{ matrix.job.hsystem
